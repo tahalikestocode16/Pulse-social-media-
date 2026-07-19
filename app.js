@@ -1,0 +1,63 @@
+const express = require("express");
+const app = express();
+const mongoose = require("mongoose");
+const MONGO_URL = "mongodb://127.0.0.1:27017/pulse";
+const cors = require("cors");
+const passport = require("passport");
+const LocalStrategy = require("passport-local");
+const passportLocalMongoose = require('passport-local-mongoose');
+const session = require("express-session");
+
+
+app.use(cors({
+    origin: ["http://localhost:5174"],
+    credentials: true,
+}));
+app.use(express.urlencoded({ extended: true }));
+
+app.use(express.json());
+// to read data sent from react
+app.use(session({
+    secret: 'pulse secretkey',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+        secure: false,
+        httpOnly: true,
+        sameSite: "lax"
+    }
+}));
+// Session
+
+// passport 
+// app.use(passport.initialize());
+// app.use(passport.session());
+// passport.use(new LocalStrategy(User.authenticate()));
+// passport.serializeUser(User.serializeUser());
+// passport.deserializeUser(User.deserializeUser());
+
+async function main() {
+    await mongoose.connect(MONGO_URL);
+}
+
+main()
+    .then(() => {
+        console.log("Connection successful");
+    })
+    .catch((err) => {
+        console.log(err);
+    });
+
+app.listen(8080, () => {
+    console.log("Listening on port 8080");
+});
+
+app.get("/", (req, res)=> {
+    res.json({message: "this will be our main page"});
+});
+
+// Error handling middleware 
+app.use((err, req, res, next)=> {
+    let { status = 500, message = "something went wrong"} = err;
+    res.status(status).json({message: message});
+});
