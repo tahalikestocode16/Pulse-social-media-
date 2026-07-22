@@ -12,7 +12,7 @@ const User = require("./models/user");
 const authRoutes = require("./routes/auth");
 const postRoutes = require("./routes/posts");
 const commentRoutes = require("./routes/comments");
-const userRoutes = require("./routes/users");
+const userRoutes = require("./routes/profile");
 
 
 app.use(cors({

@@ -10,15 +10,22 @@ const userSchema = new Schema({
         required: true,
         unique: true
     },
-    // followers: {
-    //     type: Number,
-    //     minlength: 0
-    // },
-    // following: {
-    //     type: Number,
-    //     minlength: 0,
-    // },
-  
+    followers: [{
+         type: Schema.Types.ObjectId,
+         ref: "User",
+    }],
+    following: [{
+         type: Schema.Types.ObjectId,
+         ref: "User",
+    }],
+    profilePic: {
+
+    },
+    about: {
+        type: String,
+        maxLength: 64,
+        minlength: 1
+    } 
 });
 
 userSchema.plugin(passportLocalMongoose);
