@@ -73,3 +73,71 @@ router.delete("/delete", isLogged, isProfileOwner, async (req, res, next)=> {
 
 //     res.json([user, following, followers]);
 // })
+
+
+// =================================== FOLLOWING AND FOLLOWERS ================================
+
+router.post("/:id/follow", isLogged, async (req, res, next)=> {
+   try {
+        const toFollow = await User.findById(req.params.id);
+    const Follower = await User.findById(req.user._id);
+
+    if(!toFollow) {
+        return res.status(404).json({message: "user not found"});
+    }
+
+    if(req.user._id.equals(req.params.id)) {
+        return res.status(403).json({message: "you cant follow yourself"});
+    }
+
+    if(Follower.following.some(id => id.equals(req.params.id))) {
+       return res.status(403).json({message: "already following"});
+    //    id here is not syntax write whatever you want
+    }
+    // return on errors is needed else it will execute the code ahead even the success responses
+
+    Follower.following.push(toFollow._id);
+    toFollow.followers.push(Follower._id);
+
+    await Follower.save();
+    await toFollow.save();
+   return res.status(200).json({message : "following"});
+}
+    catch(err) {
+        return next(err);
+    };
+});
+
+
+// unfollow route
+router.delete("/:id/unfollow", isLogged, async (req, res, next)=> {
+   try {
+     const toUnfollow = await User.findById(req.params.id);
+     const currentUser = await User.findById(req.user._id);
+     
+     if(!toUnfollow) {
+        return res.status(404).json({message: "no user defined"});
+     }
+     if(!currentUser.following.some(id => id.equals(req.params.id))) {
+        return res.status(400).json({message: "you arent following this user"});
+     }
+     if(req.user._id.equals(req.params.id)) {
+        return res.status(403).json({message: "you cant unfollow yourself"});
+     }
+       currentUser.following.pull(toUnfollow._id);
+       toUnfollow.followers.pull(req.user._id);
+
+       await currentUser.save();
+       await toUnfollow.save();
+
+        return res.status(200).json({message: "unfollowed"});
+     
+   } catch(err) {
+      return next(err);
+   }
+});
+
+// block route
+router.post("/:id/block", isLogged, async(req, res, next)=> {
+    res.json({message: "under development"})
+});
