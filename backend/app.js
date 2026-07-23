@@ -12,7 +12,9 @@ const User = require("./models/user");
 const authRoutes = require("./routes/auth");
 const postRoutes = require("./routes/posts");
 const commentRoutes = require("./routes/comments");
-const userRoutes = require("./routes/profile");
+const profileRoutes = require("./routes/profile");
+const upload = require("../middleware/upload");
+
 
 
 app.use(cors({

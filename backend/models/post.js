@@ -16,10 +16,14 @@ const postSchema = new Schema({
     ref: "User",
     required: true,
   },
-  createdAt: {
-    type: Date,
-  },
-});
+  like: [{
+    type: Schema.Types.ObjectId,
+     ref: "User",
+  }]
+},  {
+    timestamps: true
+}
+);
 
 const Post = mongoose.model("Post", postSchema);
 module.exports = Post;

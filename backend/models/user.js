@@ -19,9 +19,10 @@ const userSchema = new Schema({
          ref: "User",
     }],
     profilePic: {
-
+       type: String,
+       default: "https://res.cloudinary.com/xfub3wft/image/upload/f_auto,q_auto/default_dsy2xs"
     },
-    about: {
+    bio: {
         type: String,
         maxLength: 64,
         minlength: 1

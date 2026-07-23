@@ -3,6 +3,7 @@ const router = express.Router();
 const User = require("../models/user.js");
 const isLogged = require("../middleware/authenticate.js");
 const isProfileOwner = require("../middleware/profileowner.js");
+const upload = require("../middleware/upload");
 
 
 // view profile route
@@ -14,9 +15,10 @@ router.get("/:id", isLogged, isProfileOwner, async (req, res)=> {
 
 
 // edit profile
-
-router.patch("/edit", isLogged, isProfileOwner, async (req, res, next)=> {
+// accept one profile pic 
+router.patch("/edit", isLogged, isProfileOwner, upload.single("profilePic"), async (req, res, next)=> {
     try {
+        console.log(req.file);
         let updates = {};
 
     if(req.body.username !== undefined) {
@@ -25,11 +27,15 @@ router.patch("/edit", isLogged, isProfileOwner, async (req, res, next)=> {
      if(req.body.bio !== undefined) {
         updates.bio = req.body.bio;
     }
-     if(req.body.profilePic !== undefined) {
-        updates.profilePic = req.body.profilePic;
+    // here we use undefined comparision because req.body wil always exist we have to see if it
+    // has anything inside it
+
+    if(req.file) {
+        updates.profilePic = req.file.path;
     }
-
-
+    // req.file comes from cloudinary after we upload the image so if no image no Route btu can write
+    // req.file !== undefined it will do the exact same thing
+    //  removed pfp route due to using multer
     const updatedUser = await User.findByIdAndUpdate(req.user._id, {
         $set: updates
     },
