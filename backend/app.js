@@ -8,12 +8,22 @@ const LocalStrategy = require("passport-local");
 const passportLocalMongoose = require('passport-local-mongoose');
 const session = require("express-session");
 const User = require("./models/user");
+const upload = require("./middleware/profileupload");
 
+
+// Routes
 const authRoutes = require("./routes/auth");
 const postRoutes = require("./routes/posts");
 const commentRoutes = require("./routes/comments");
 const profileRoutes = require("./routes/profile");
-const upload = require("../middleware/upload");
+const reportRoutes = require("./routes/report");
+
+
+app.use("/auth", authRoutes);
+app.use("/posts", postRoutes);
+app.use("/comments", commentRoutes);
+app.use("/profile", profileRoutes);
+app.use("/reports", reportRoutes);
 
 
 

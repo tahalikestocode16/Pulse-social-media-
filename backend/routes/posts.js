@@ -4,15 +4,16 @@ const User = require("../models/user.js");
 const Post = require("../models/post.js");
 const isLogged = require("../middleware/authenticate.js");
 const isPostOwner = require("../middleware/postowner.js");
+const postUpload = require("../middleware/postupload.js");
 
 // POST  / general feed
 router.get("/fyp", async (req, res) => {
     try {
         if (req.user) {
-        let currentUser = await User.findById(req.user._id);
-        let feed = currentUser.following.push(req.user._id)
+        let excludedUsers = await User.findById(req.user._id);
+        excludedUsers.following.push(req.user._id)
         let post = await Post.find({
-                author: { $nin: feed }
+                author: { $nin: excludedUsers.following }
             });
         return res.status(200).json(post);
         }
@@ -24,8 +25,8 @@ router.get("/fyp", async (req, res) => {
             // basically original value mai ye lagake dedo and so and so cindition lelo
             let posts = await Post.aggregate([
                 {
-                    $addfields: {
-                        likeCount: { $size: "likes "}
+                    $addFields: {
+                        likeCount: { $size: "$likes"}
                     }
                 },
                 {
@@ -34,6 +35,8 @@ router.get("/fyp", async (req, res) => {
                         // highest likes first -1 means descending 100> 50> 10 1 would be opposite 10> 50> 100
                         createdAt: -1
                         // if same likes newest first 
+                        // for dates old date smaller number new date bigger number thats why we 
+                        // here are putting -1
                     }
                 },
                 {
@@ -71,35 +74,67 @@ router.get("/following", isLogged, async (req, res) => {
 });
 
 // Create route
-router.post("/create", isLogged, async (req, res) => {
-    let { content, author, title } = req.body;
+router.post("/create", isLogged, postUpload.single("media"), async (req, res, next) => {
+   try {
+     let { content, title } = req.body;
+    let author = req.user._id;
+    let mediaUrl = undefined;
+    let mediaType = undefined;
+    if(req.file) {
+        mediaUrl = req.file.path;
+        mediaType =  req.file.resource_type;
+    }
     await Post.create({
-        title: title,
-        content: content,
-        author: author,
-        createdAt: Date.now()
+        title,
+        content,
+        author,
+        mediaUrl,
+        mediaType
     });
-    res.json({ message: "Post created" });
+   return res.json({ message: "Post created" });
+   }
+   catch(err) {
+    return next(err);
+   }
 });
 
 // Edit route 
-router.patch("/edit", isPostOwner, async (req, res) => {
-    let { id, content, title } = req.body;
-    await Post.findByIdAndUpdate(id, {
+router.patch("/:id", isLogged, isPostOwner, async (req, res, next) => {
+   try {
+     let { content, title } = req.body;
+     let id = req.params.id;
+   let post = await Post.findByIdAndUpdate(id, {
         content: content,
         title: title,
     });
-    res.json({ message: "post succesfully updated" });
+    if(!post) {
+        return res.status(404).json({message: "post not found"});
+    }
+    return res.json({ message: "post succesfully updated" });
+
+   }
+
+   catch(err) {
+    return next(err);
+   }
 })
 
 // Delete route
-router.delete("/delete", isPostOwner, async (req, res) => {
-    let { id } = req.body;
-    await Post.findByIdAndDelete(id);
-    res.json({ message: "Post deleted" });
+router.delete("/:id", isLogged, isPostOwner, async (req, res, next) => {
+  try {
+      let id = req.params.id;
+   let post = await Post.findByIdAndDelete(id);
+    if(!post) {
+        return res.status(404).json({message: "post not found"});
+    }
+    return res.json({ message: "Post deleted" });
+
+  }
+  catch(err) {
+    return next(err);
+  }
 });
 // will add deleting from admin panel or as admin later
-module.exports = router;
 
 
 // ========================================= likes ===========================================
@@ -126,3 +161,4 @@ router.post("/:id/like", isLogged, async (req, res, next) => {
         return next(err);
     }
 });
+module.exports = router;

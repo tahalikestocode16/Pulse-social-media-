@@ -17,28 +17,52 @@ router.get("/comments", async (req, res)=> {
 // })
 
 // Create route
-router.post("/create", isLogged, async (req, res)=> {
-    let { author, message, createdAt } = req.body;
+router.post("/posts/:postId/comment", isLogged, async (req, res, next)=> {
+   try {
+    let message  = req.body.message;
+    let author = req.user._id;
+    let id = req.params.postId
+    let post = await Post.findById(id);
+    if(!post) {
+        return res.status(404).json({message: "post not found"});
+    }
     await Comment.create({
         author: author,
         message: message,
-        createdAt: Date.now()
+        post: post,
     });
     res.json({message: "comment added"});
+   }
+   catch(err) {
+    return next(err);
+   }
 });
 
 // Edit route 
-router.patch("/:id/edit", isLogged, isCommentOwner, async (req, res)=> {
-    let { id, author, message } = req.body; 
-    await Comment.findByIdAndUpdate(id, {
-        message: message,
-        author: author,
-    });
-    res.json({message: "comment updated"});
+router.patch("/:id", isLogged, isCommentOwner, async (req, res, next)=> {
+    try {
+        let { id } = req.params; 
+    let message = req.body.message
+    if(!message) {
+        return res.status(404).json({message: "invalid request"});
+    }
+    let comment = await Comment.findByIdAndUpdate(id, 
+        { message },
+         { new: true, runValidators: true}
+        );
+
+    if(!comment) {
+        return res.status(404).json({message: "comment does not exist"});
+    }
+    return res.status(200).json({message: "comment updated"});
+    }
+    catch(err) {
+        return next(err);
+    }
 })
 
 // Delete route
-router.delete("/:id/delete", isLogged, isCommentOwner, async (req, res)=> {
+router.delete("/:id", isLogged, isCommentOwner, async (req, res)=> {
     let { id } = req.body;
     await Comment.findByIdAndDelete(id);
     res.json({message: "Comment deleted"});

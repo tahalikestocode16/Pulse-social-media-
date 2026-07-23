@@ -3,7 +3,7 @@ const router = express.Router();
 const User = require("../models/user.js");
 const isLogged = require("../middleware/authenticate.js");
 const isProfileOwner = require("../middleware/profileowner.js");
-const upload = require("../middleware/upload");
+const upload = require("../middleware/profileupload.js");
 
 
 // view profile route
@@ -147,3 +147,5 @@ router.delete("/:id/unfollow", isLogged, async (req, res, next)=> {
 router.post("/:id/block", isLogged, async(req, res, next)=> {
     res.json({message: "under development"})
 });
+
+module.exports = router;

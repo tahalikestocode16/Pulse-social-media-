@@ -19,7 +19,15 @@ const postSchema = new Schema({
   likes: [{
     type: Schema.Types.ObjectId,
      ref: "User",
-  }]
+  }],
+  mediaUrl: {
+    type: String,
+  },
+  mediaType: {
+    enum: ["image", "video"]
+    // enum means its allowed to have either of these two values type can either be image or video
+
+  }
 },  {
     timestamps: true
 }

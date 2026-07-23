@@ -5,10 +5,11 @@ const router = express.Router();
 // Register route
 router.post("/register", async (req, res, next)=> {
    try {
-     let { username, email, password } = req.body;
+     let { username, email, password, } = req.body;
     const signedUser = new User({
         username, 
-        email
+        email,
+        role: "user"
     });
     await User.register(signedUser, password);
     req.login(signedUser, (err)=> {
