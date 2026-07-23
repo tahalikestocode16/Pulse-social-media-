@@ -8,19 +8,42 @@ const isPostOwner = require("../middleware/postowner.js");
 // POST  / general feed
 router.get("/fyp", async (req, res) => {
     try {
+        if (req.user) {
         let currentUser = await User.findById(req.user._id);
-        if (!currentUser) {
-            let likes = Post.likes.length();
-            
-
-        }
-        else {
-            let following = currentUser.following;
-            let post = await Post.find({
-                author: { $nin: following }
+        let feed = currentUser.following.push(req.user._id)
+        let post = await Post.find({
+                author: { $nin: feed }
             });
-            return res.status(200).json(post);
+        return res.status(200).json(post);
         }
+        // this person is not logged in means no curated feed show him generic top content
+        else {
+            // aggregate method se schema mai likecount add krwa rahe uski value jo hai jo likes ka size
+            // hai wo hogi, its temporary nothing is saved to mongodb
+
+            // basically original value mai ye lagake dedo and so and so cindition lelo
+            let posts = await Post.aggregate([
+                {
+                    $addfields: {
+                        likeCount: { $size: "likes "}
+                    }
+                },
+                {
+                    sort: {
+                        likeCount: -1, 
+                        // highest likes first -1 means descending 100> 50> 10 1 would be opposite 10> 50> 100
+                        createdAt: -1
+                        // if same likes newest first 
+                    }
+                },
+                {
+                    $limit: 20,
+                    // only send the top 20 posts
+                }
+            ]);
+            return res.status(200).json(posts);
+        }
+      
     }
     catch (err) {
         return res.status(400).json("feed not available try refreshing");
