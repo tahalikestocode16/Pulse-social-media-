@@ -9,6 +9,13 @@ const passportLocalMongoose = require('passport-local-mongoose');
 const session = require("express-session");
 const User = require("./models/user");
 const upload = require("./middleware/profileupload");
+// socket.io setup 
+
+const { Server } = require("socket.io");
+const http = require("http");
+const server = http.createServer(app);
+const io = new Server(server);
+
 
 
 // Routes
@@ -18,6 +25,8 @@ const commentRoutes = require("./routes/comments");
 const profileRoutes = require("./routes/profile");
 const reportRoutes = require("./routes/report");
 const notificationRoutes = require("./routes/notificaton.js");
+const conversationRoutes = require("./routes/conversation.js");
+const messageRoutes = require("./routes/message.js");
 
 // setup routes
 app.use("/notification", notificationRoutes);
@@ -26,6 +35,9 @@ app.use("/posts", postRoutes);
 app.use("/comments", commentRoutes);
 app.use("/profile", profileRoutes);
 app.use("/reports", reportRoutes);
+app.use("/conversation", conversationRoutes);
+app.use("/messages", messageRoutes);
+
 
 
 
@@ -68,9 +80,20 @@ main()
         console.log(err);
     });
 
-app.listen(8080, () => {
+io.on("connection", (socket) => {
+    console.log("user connected:", socket.id);
+
+    socket.on("disconnect", () => {
+        console.log("user disconnected:", socket.id);
+    });
+});    
+
+server.listen(8080, () => {
     console.log("Listening on port 8080");
 });
+
+
+// http normal express runs on response request layout now we have a server thats always active 
 
 
 
