@@ -1,1 +1,0 @@
-i believe i need to make a separate schema for comments 
