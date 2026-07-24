@@ -17,8 +17,10 @@ const postRoutes = require("./routes/posts");
 const commentRoutes = require("./routes/comments");
 const profileRoutes = require("./routes/profile");
 const reportRoutes = require("./routes/report");
+const notificationRoutes = require("./routes/notificaton.js");
 
-
+// setup routes
+app.use("/notification", notificationRoutes);
 app.use("/auth", authRoutes);
 app.use("/posts", postRoutes);
 app.use("/comments", commentRoutes);
