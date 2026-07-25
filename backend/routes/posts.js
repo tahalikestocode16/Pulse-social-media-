@@ -5,17 +5,23 @@ const Post = require("../models/post.js");
 const isLogged = require("../middleware/authenticate.js");
 const isPostOwner = require("../middleware/postowner.js");
 const postUpload = require("../middleware/postupload.js");
+const SavedPost = require("../models/savedpost.js");
 
 // POST  / general feed
 router.get("/fyp", async (req, res) => {
     try {
         if (req.user) {
-        let excludedUsers = await User.findById(req.user._id);
-        excludedUsers.following.push(req.user._id)
-        let post = await Post.find({
-                author: { $nin: excludedUsers.following }
+            let currentUser = await User.findById(req.user._id);
+            currentUser.following.push(req.user._id);
+            // also exclude posts from users you blocked
+            let excluded = [
+                ...currentUser.following,
+                ...currentUser.blockedUsers
+            ];
+            let post = await Post.find({
+                author: { $nin: excluded }
             });
-        return res.status(200).json(post);
+            return res.status(200).json(post);
         }
         // this person is not logged in means no curated feed show him generic top content
         else {
@@ -62,7 +68,7 @@ router.get("/following", isLogged, async (req, res) => {
         let following = currentUser.following;
 
         let post = await Post.find({
-            author: { $in: following }
+            author: { $in: following, $nin: currentUser.blockedUsers }
         });
         return res.status(200).json(post);
 
@@ -145,6 +151,10 @@ router.post("/:id/like", isLogged, async (req, res, next) => {
         if (!post) {
             return res.status(404).json({ message: " post does not exist " });
         }
+        let currentUser = await User.findById(req.user._id);
+        if (currentUser.blockedUsers.includes(post.author.toString())) {
+            return res.status(403).json({ message: "cannot like posts from blocked users" });
+        }
         let message
         if (post.likes.some(id => id.equals(req.user._id))) {
             post.likes.pull(req.user._id);
@@ -160,5 +170,126 @@ router.post("/:id/like", isLogged, async (req, res, next) => {
     catch (err) {
         return next(err);
     }
+});
+
+
+// ===================================== SAVING POSTS ==========================================
+// saving post 
+
+router.post("/:id/save", isLogged, async(req,res,next)=>{
+
+    try{
+
+        let existingSave = await SavedPost.findOne({
+            user: req.user._id,
+            post: req.params.id
+        });
+
+
+        if(existingSave){
+            return res.status(400).json({
+                message:"post already saved"
+            });
+        }
+
+
+        let savedPost = await SavedPost.create({
+
+            user: req.user._id,
+            post: req.params.id
+
+        });
+
+
+        return res.status(201).json(savedPost);
+
+
+    }
+    catch(err){
+        next(err);
+    }
+
+});
+
+// unsave 
+
+router.delete("/:id/save", isLogged, async(req,res,next)=>{
+
+    try{
+
+        let savedPost = await SavedPost.findOneAndDelete({
+
+            user:req.user._id,
+            post:req.params.id
+
+        });
+
+
+        if(!savedPost){
+            return res.status(404).json({
+                message:"saved post not found"
+            });
+        }
+
+
+        return res.status(200).json({
+            message:"post unsaved"
+        });
+
+
+    }
+    catch(err){
+        next(err);
+    }
+
+});
+
+// show all saved
+router.get("/", isLogged, async(req,res,next)=>{
+
+    try{
+
+        let savedPosts = await SavedPost.find({
+            user:req.user._id
+        })
+        .populate("post")
+        .sort({
+            createdAt:-1
+        });
+
+
+        return res.status(200).json(savedPosts);
+
+
+    }
+    catch(err){
+        next(err);
+    }
+
+});
+
+// check if a post is saved 
+router.get("/:id/save", isLogged, async(req,res,next)=>{
+
+    try{
+
+        let saved = await SavedPost.findOne({
+
+            user:req.user._id,
+            post:req.params.id
+
+        });
+
+
+        return res.status(200).json({
+            saved: !!saved
+        });
+
+
+    }
+    catch(err){
+        next(err);
+    }
+
 });
 module.exports = router;

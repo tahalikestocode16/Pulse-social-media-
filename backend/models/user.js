@@ -32,7 +32,13 @@ const userSchema = new Schema({
         enum: ["user", "admin"],
         default: "user"
 
+    },
+    blockedUsers: [
+    {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User"
     }
+]
 });
 
 userSchema.plugin(passportLocalMongoose);

@@ -9,13 +9,6 @@ const passportLocalMongoose = require('passport-local-mongoose');
 const session = require("express-session");
 const User = require("./models/user");
 const upload = require("./middleware/profileupload");
-// socket.io setup 
-
-const { Server } = require("socket.io");
-const http = require("http");
-const server = http.createServer(app);
-const io = new Server(server);
-
 
 
 // Routes
@@ -27,6 +20,7 @@ const reportRoutes = require("./routes/report");
 const notificationRoutes = require("./routes/notificaton.js");
 const conversationRoutes = require("./routes/conversation.js");
 const messageRoutes = require("./routes/message.js");
+const userRoutes = require("./routes/users.js");
 
 // setup routes
 app.use("/notification", notificationRoutes);
@@ -37,8 +31,7 @@ app.use("/profile", profileRoutes);
 app.use("/reports", reportRoutes);
 app.use("/conversation", conversationRoutes);
 app.use("/messages", messageRoutes);
-
-
+app.use("/users", userRoutes);
 
 
 app.use(cors({
@@ -61,7 +54,7 @@ app.use(session({
 }));
 // Session
 
-passport 
+passport
 app.use(passport.initialize());
 app.use(passport.session());
 passport.use(new LocalStrategy(User.authenticate()));
@@ -80,13 +73,92 @@ main()
         console.log(err);
     });
 
+
+const { Server } = require("socket.io");
+const http = require("http");
+const server = http.createServer(app);
+
+const io = new Server(server, {
+    cors: {
+        origin: "http://localhost:5173",
+        credentials: true
+    }
+});
+
+
+// socket.io setup 
+
+
+// temporary memory
+const userSocketMap = new Map();
+
+
+app.set("io", io);
+
+
 io.on("connection", (socket) => {
+
     console.log("user connected:", socket.id);
 
-    socket.on("disconnect", () => {
-        console.log("user disconnected:", socket.id);
+
+    // get user id from frontend socket connection
+    const userId = socket.handshake.auth.userId;
+
+
+    if(userId) {
+        userSocketMap.set(userId, socket.id);
+    }
+
+
+    console.log(userSocketMap);
+
+
+
+    // join conversation room
+    socket.on("joinConversation", (conversationId) => {
+
+        socket.join(conversationId);
+
+        console.log(
+            "joined conversation:",
+            conversationId
+        );
+
     });
-});    
+//    to means to everyone else in the room except yourself
+    socket.on("typing", ({ conversationId, userId }) => {
+
+    socket.to(conversationId).emit("userTyping", {
+        userId
+    });
+
+});
+
+
+    // disconnect cleanup
+    socket.on("disconnect", () => {
+
+        for(let [userId, socketId] of userSocketMap) {
+
+            if(socketId === socket.id) {
+
+                userSocketMap.delete(userId);
+                break;
+
+            }
+
+        }
+
+
+        console.log(
+            "user disconnected:",
+            socket.id
+        );
+
+    });
+
+});
+
 
 server.listen(8080, () => {
     console.log("Listening on port 8080");
@@ -101,15 +173,15 @@ server.listen(8080, () => {
 // ============================== CODE STARTS HERE +====================================
 
 // Main page
-app.get("/", (req, res)=> {
-    res.json({message: "this will be our main page"});
+app.get("/", (req, res) => {
+    res.json({ message: "this will be our main page" });
 });
 
 
 
 // Error handling middleware 
-app.use((err, req, res, next)=> {
-    let { status = 500, message = "something went wrong"} = err;
-    res.status(status).json({message: message});
+app.use((err, req, res, next) => {
+    let { status = 500, message = "something went wrong" } = err;
+    res.status(status).json({ message: message });
 });
 
