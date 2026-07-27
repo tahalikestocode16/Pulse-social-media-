@@ -20,7 +20,7 @@ router.get("/fyp", async (req, res) => {
             ];
             let post = await Post.find({
                 author: { $nin: excluded }
-            });
+            }).populate("author");
             return res.status(200).json(post);
         }
         // this person is not logged in means no curated feed show him generic top content
@@ -32,12 +32,12 @@ router.get("/fyp", async (req, res) => {
             let posts = await Post.aggregate([
                 {
                     $addFields: {
-                        likeCount: { $size: "$likes"}
+                        likeCount: { $size: "$likes" }
                     }
                 },
                 {
                     sort: {
-                        likeCount: -1, 
+                        likeCount: -1,
                         // highest likes first -1 means descending 100> 50> 10 1 would be opposite 10> 50> 100
                         createdAt: -1
                         // if same likes newest first 
@@ -52,7 +52,7 @@ router.get("/fyp", async (req, res) => {
             ]);
             return res.status(200).json(posts);
         }
-      
+
     }
     catch (err) {
         return res.status(400).json("feed not available try refreshing");
@@ -69,7 +69,7 @@ router.get("/following", isLogged, async (req, res) => {
 
         let post = await Post.find({
             author: { $in: following, $nin: currentUser.blockedUsers }
-        });
+        }).populate("author");
         return res.status(200).json(post);
 
     }
@@ -81,64 +81,64 @@ router.get("/following", isLogged, async (req, res) => {
 
 // Create route
 router.post("/create", isLogged, postUpload.single("media"), async (req, res, next) => {
-   try {
-     let { content, title } = req.body;
-    let author = req.user._id;
-    let mediaUrl = undefined;
-    let mediaType = undefined;
-    if(req.file) {
-        mediaUrl = req.file.path;
-        mediaType =  req.file.resource_type;
+    try {
+        let { content, title } = req.body;
+        let author = req.user._id;
+        let mediaUrl = undefined;
+        let mediaType = undefined;
+        if (req.file) {
+            mediaUrl = req.file.path;
+            mediaType = req.file.resource_type;
+        }
+        await Post.create({
+            title,
+            content,
+            author,
+            mediaUrl,
+            mediaType
+        });
+        return res.json({ message: "Post created" });
     }
-    await Post.create({
-        title,
-        content,
-        author,
-        mediaUrl,
-        mediaType
-    });
-   return res.json({ message: "Post created" });
-   }
-   catch(err) {
-    return next(err);
-   }
+    catch (err) {
+        return next(err);
+    }
 });
 
 // Edit route 
 router.patch("/:id", isLogged, isPostOwner, async (req, res, next) => {
-   try {
-     let { content, title } = req.body;
-     let id = req.params.id;
-   let post = await Post.findByIdAndUpdate(id, {
-        content: content,
-        title: title,
-    });
-    if(!post) {
-        return res.status(404).json({message: "post not found"});
+    try {
+        let { content, title } = req.body;
+        let id = req.params.id;
+        let post = await Post.findByIdAndUpdate(id, {
+            content: content,
+            title: title,
+        });
+        if (!post) {
+            return res.status(404).json({ message: "post not found" });
+        }
+        return res.json({ message: "post succesfully updated" });
+
     }
-    return res.json({ message: "post succesfully updated" });
 
-   }
-
-   catch(err) {
-    return next(err);
-   }
+    catch (err) {
+        return next(err);
+    }
 })
 
 // Delete route
 router.delete("/:id", isLogged, isPostOwner, async (req, res, next) => {
-  try {
-      let id = req.params.id;
-   let post = await Post.findByIdAndDelete(id);
-    if(!post) {
-        return res.status(404).json({message: "post not found"});
-    }
-    return res.json({ message: "Post deleted" });
+    try {
+        let id = req.params.id;
+        let post = await Post.findByIdAndDelete(id);
+        if (!post) {
+            return res.status(404).json({ message: "post not found" });
+        }
+        return res.json({ message: "Post deleted" });
 
-  }
-  catch(err) {
-    return next(err);
-  }
+    }
+    catch (err) {
+        return next(err);
+    }
 });
 // will add deleting from admin panel or as admin later
 
@@ -152,7 +152,9 @@ router.post("/:id/like", isLogged, async (req, res, next) => {
             return res.status(404).json({ message: " post does not exist " });
         }
         let currentUser = await User.findById(req.user._id);
-        if (currentUser.blockedUsers.includes(post.author.toString())) {
+        if (currentUser.blockedUsers.includes(post.author.toString())
+            ||
+            postAuthor.blockedUsers.includes(req.user._id)) {
             return res.status(403).json({ message: "cannot like posts from blocked users" });
         }
         let message
@@ -165,7 +167,10 @@ router.post("/:id/like", isLogged, async (req, res, next) => {
             message = { message: " liked post " };
         }
         await post.save();
-        return res.status(200).json(message);
+        return res.status(200).json({
+            message: message.message,
+            likes: post.likes
+        });
     }
     catch (err) {
         return next(err);
@@ -176,9 +181,9 @@ router.post("/:id/like", isLogged, async (req, res, next) => {
 // ===================================== SAVING POSTS ==========================================
 // saving post 
 
-router.post("/:id/save", isLogged, async(req,res,next)=>{
+router.post("/:id/save", isLogged, async (req, res, next) => {
 
-    try{
+    try {
 
         let existingSave = await SavedPost.findOne({
             user: req.user._id,
@@ -186,9 +191,9 @@ router.post("/:id/save", isLogged, async(req,res,next)=>{
         });
 
 
-        if(existingSave){
+        if (existingSave) {
             return res.status(400).json({
-                message:"post already saved"
+                message: "post already saved"
             });
         }
 
@@ -205,7 +210,7 @@ router.post("/:id/save", isLogged, async(req,res,next)=>{
 
 
     }
-    catch(err){
+    catch (err) {
         next(err);
     }
 
@@ -213,70 +218,70 @@ router.post("/:id/save", isLogged, async(req,res,next)=>{
 
 // unsave 
 
-router.delete("/:id/save", isLogged, async(req,res,next)=>{
+router.delete("/:id/save", isLogged, async (req, res, next) => {
 
-    try{
+    try {
 
         let savedPost = await SavedPost.findOneAndDelete({
 
-            user:req.user._id,
-            post:req.params.id
+            user: req.user._id,
+            post: req.params.id
 
         });
 
 
-        if(!savedPost){
+        if (!savedPost) {
             return res.status(404).json({
-                message:"saved post not found"
+                message: "saved post not found"
             });
         }
 
 
         return res.status(200).json({
-            message:"post unsaved"
+            message: "post unsaved"
         });
 
 
     }
-    catch(err){
+    catch (err) {
         next(err);
     }
 
 });
 
 // show all saved
-router.get("/", isLogged, async(req,res,next)=>{
+router.get("/", isLogged, async (req, res, next) => {
 
-    try{
+    try {
 
         let savedPosts = await SavedPost.find({
-            user:req.user._id
+            user: req.user._id
         })
-        .populate("post")
-        .sort({
-            createdAt:-1
-        });
+            .populate("post")
+            .sort({
+                createdAt: -1
+            });
 
 
         return res.status(200).json(savedPosts);
 
 
     }
-    catch(err){
+    catch (err) {
         next(err);
     }
 
 });
 
 // check if a post is saved 
-router.get("/:id/save", isLogged, async(req,res,next)=>{
+router.get("/:id/save", isLogged, async (req, res, next) => {
 
-    try{
+    try {
 
         let saved = await SavedPost.findOne({
 
-            user:req.user._id,
-            post:req.params.id
+            user: req.user._id,
+            post: req.params.id
 
         });
 
@@ -287,7 +292,7 @@ router.get("/:id/save", isLogged, async(req,res,next)=>{
 
 
     }
-    catch(err){
+    catch (err) {
         next(err);
     }
 

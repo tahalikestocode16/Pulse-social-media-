@@ -6,9 +6,17 @@ const isLogged = require("../middleware/authenticate.js");
 const isCommentOwner = require("../middleware/cmtowner.js");
 
 // Index route
-router.get("/comments", async (req, res) => {
-    const comment = await Comment.find();
-    res.json(posts);
+router.get("/:postId", async (req, res, next) => {
+   try {
+     const comments = await Comment.find({
+        post: req.params.id
+    }).populate("author");
+    
+  return  res.status(200).json(comments);
+   }
+   catch(err) {
+    return next(err);
+   }
 });
 
 // // Read route 

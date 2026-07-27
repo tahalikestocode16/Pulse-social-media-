@@ -42,6 +42,8 @@ router.get("/", isLogged, isAdmin, async (req,res,next)=>{
     }
 });
 
+
+
 router.patch("/:id", isLogged, isAdmin, async(req,res,next)=>{
     try{
 

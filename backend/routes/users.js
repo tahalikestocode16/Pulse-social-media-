@@ -140,8 +140,17 @@ router.get("/:id/block", isLogged, async (req, res, next) => {
     catch (err) {
         next(err);
     }
-
 });
 
+
+router.get("/me", isLogged, async (req, res, next)=> {
+    try {
+      let user = await User.findById(req.user._id);
+      return res.status(200).json(user);
+    }
+    catch(err) {
+        return next(err);
+    }
+})
 
 module.exports = router;

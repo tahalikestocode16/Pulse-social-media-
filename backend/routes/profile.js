@@ -7,11 +7,17 @@ const upload = require("../middleware/profileupload.js");
 
 
 // view profile route
-router.get("/:id", isLogged, isProfileOwner, async (req, res)=> {
+router.get("/:id", async (req, res)=> {
     let { id } = req.params;
-    let profile = await User.findById(id);
+    let profile = await User.findById(id).select("-password");
     res.status(200).json(profile);
 });
+
+router.get("/me", isProfileOwner, isLogged, async (req, res)=> {
+    let profile = await User.findById(req.user._id).select("-password");
+    res.status(200).json(profile);
+});
+
 
 
 // edit profile

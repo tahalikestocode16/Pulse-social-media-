@@ -1,15 +1,18 @@
 import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import socket from "./socket";
+import { RouterProvider } from 'react-router-dom';
+import Register from "./components/Register.jsx";
+
+// testing
+
+useEffect(() => {
+    console.log("socket connected");
+
+}, []);
 
 function App() {
-  return(
-    <div>
-      <p>hello</p>
-    </div>
-  );
+  return <RouterProvider router={router} />;
+  
 }
 
 export default App
