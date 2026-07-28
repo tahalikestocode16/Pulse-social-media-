@@ -46,38 +46,67 @@ function Post(props) {
     }
   }
 
+
+  const savePost = async() => {
+    try{
+      const response = await fetch(`/posts/${props._id}/save`, {
+        method: "POST",
+        credentials: "include"
+      });
+      const data = await response.json();
+      if(response.ok) {
+        if(data.saved) {
+          // show filled bookmark function
+        }
+        else{
+          // show unfilled bookmark
+        }
+      }
+    }
+    catch(err) {
+      console.log(err);
+    }
+  }
+
   
   // agar current user exist karta hai to aur usi id author ki id ke barabar hai to render karo
 
   return (
-    <div>
-      <p onClick={openProfile} className="author">
-        {props.author}
-      </p>
+    <div className="card">
+      <p className="author">{props.author.username}</p>
       <p onDoubleClick={addLike} className="content">
         {props.content}
       </p>
-       {props.media &&  (
-            <img src={props.mediaUrl}/>
-        )}
-         {props.currentUser && 
-          props.author._id === props.currentUser._id && (
-          <div>
-            <button onClick={getEdit} className="editBtn">edit</button>
-            <button onClick={deletePost} className="deleteBtn">delete</button>
-            </div>   
-        )}
-        <ul>
-          <button>report</button>
-          <button> share</button>
-        </ul>
-      <button onClick={addLike} className="button">
-        {likes.length}
-      </button>
-      <button onClick={openComment} classname="button">
-      </button>
-      <button className="save"></button>
-
+      {props.media && <img src={props.mediaUrl} alt="post media" />}
+      {props.currentUser && props.author._id === props.currentUser._id && (
+        <div className="actions">
+          <button onClick={getEdit} className="editBtn">
+            edit
+          </button>
+          <button onClick={deletePost} className="deleteBtn">
+            delete
+          </button>
+        </div>
+      )}
+      <ul className="meta">
+        <li>
+          <button type="button">report</button>
+        </li>
+        <li>
+          <button type="button">share</button>
+        </li>
+      </ul>
+      <div className="buttons">
+        <button type="button" onClick={addLike} className="button">
+          {likes.length}
+        </button>
+        <button type="button" onClick={openComment} className="button">
+          comment
+        </button>
+        <button type="button" onClick={savePost} className="button">
+          save
+        </button>
+      </div>
     </div>
   );
 }

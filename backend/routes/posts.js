@@ -2,62 +2,69 @@ const express = require("express");
 const router = express.Router();
 const User = require("../models/user.js");
 const Post = require("../models/post.js");
-const isLogged = require("../middleware/authenticate.js");
-const isPostOwner = require("../middleware/postowner.js");
-const postUpload = require("../middleware/postupload.js");
+const isLogged = require("../models/middleware/authenticate.js");
+const isPostOwner = require("../models/middleware/postowner.js");
+const postUpload = require("../models/middleware/postupload.js");
 const SavedPost = require("../models/savedpost.js");
 
 // POST  / general feed
-router.get("/fyp", async (req, res) => {
-    try {
-        if (req.user) {
-            let currentUser = await User.findById(req.user._id);
-            currentUser.following.push(req.user._id);
-            // also exclude posts from users you blocked
-            let excluded = [
-                ...currentUser.following,
-                ...currentUser.blockedUsers
-            ];
-            let post = await Post.find({
-                author: { $nin: excluded }
-            }).populate("author");
-            return res.status(200).json(post);
-        }
-        // this person is not logged in means no curated feed show him generic top content
-        else {
-            // aggregate method se schema mai likecount add krwa rahe uski value jo hai jo likes ka size
-            // hai wo hogi, its temporary nothing is saved to mongodb
-
-            // basically original value mai ye lagake dedo and so and so cindition lelo
-            let posts = await Post.aggregate([
-                {
-                    $addFields: {
-                        likeCount: { $size: "$likes" }
-                    }
-                },
-                {
-                    sort: {
-                        likeCount: -1,
-                        // highest likes first -1 means descending 100> 50> 10 1 would be opposite 10> 50> 100
-                        createdAt: -1
-                        // if same likes newest first 
-                        // for dates old date smaller number new date bigger number thats why we 
-                        // here are putting -1
-                    }
-                },
-                {
-                    $limit: 20,
-                    // only send the top 20 posts
-                }
-            ]);
-            return res.status(200).json(posts);
-        }
-
-    }
-    catch (err) {
-        return res.status(400).json("feed not available try refreshing");
-    }
+router.get("/fyp", async (req,res)=>{
+    const posts = await Post.find({}).populate("author");
+    res.json(posts);
 });
+
+// router.get("/fyp", async (req, res) => {
+//     try {
+//         if (req.user) {
+//             let currentUser = await User.findById(req.user._id);
+//             // currentUser.following.push(req.user._id);
+//             // also exclude posts from users you blocked
+//             let excluded = [
+//                 ...currentUser.following,
+//                 ...currentUser.blockedUsers
+//             ];
+//             // let post = await Post.find({
+//             //     author: { $nin: excluded }
+//             // }).populate("author");
+
+//             let post = await Post.find({}).populate("author");
+//             return res.status(200).json(post);
+//         }
+//         // this person is not logged in means no curated feed show him generic top content
+//         else {
+//             // aggregate method se schema mai likecount add krwa rahe uski value jo hai jo likes ka size
+//             // hai wo hogi, its temporary nothing is saved to mongodb
+
+//             // basically original value mai ye lagake dedo and so and so cindition lelo
+//             let posts = await Post.aggregate([
+//                 {
+//                     $addFields: {
+//                         likeCount: { $size: "$likes" }
+//                     }
+//                 },
+//                 {
+//                     $sort: {
+//                         likeCount: -1,
+//                         // highest likes first -1 means descending 100> 50> 10 1 would be opposite 10> 50> 100
+//                         createdAt: -1
+//                         // if same likes newest first 
+//                         // for dates old date smaller number new date bigger number thats why we 
+//                         // here are putting -1
+//                     }
+//                 },
+//                 {
+//                     $limit: 20,
+//                     // only send the top 20 posts
+//                 }
+//             ]);
+//             return res.status(200).json(posts);
+//         }
+
+//     }
+//     catch (err) {
+//         return res.status(400).json("feed not available try refreshing");
+//     }
+// });
 
 
 
@@ -92,7 +99,6 @@ router.post("/create", isLogged, postUpload.single("media"), async (req, res, ne
         }
         await Post.create({
             title,
-            content,
             author,
             mediaUrl,
             mediaType
@@ -110,7 +116,6 @@ router.patch("/:id", isLogged, isPostOwner, async (req, res, next) => {
         let { content, title } = req.body;
         let id = req.params.id;
         let post = await Post.findByIdAndUpdate(id, {
-            content: content,
             title: title,
         });
         if (!post) {
@@ -192,9 +197,13 @@ router.post("/:id/save", isLogged, async (req, res, next) => {
 
 
         if (existingSave) {
-            return res.status(400).json({
-                message: "post already saved"
-            });
+            await SavedPost.findOneAndDelete({
+
+            user: req.user._id,
+            post: req.params.id
+
+        });
+        return res.status(200).json({ saved: false });
         }
 
 
@@ -206,39 +215,9 @@ router.post("/:id/save", isLogged, async (req, res, next) => {
         });
 
 
-        return res.status(201).json(savedPost);
-
-
-    }
-    catch (err) {
-        next(err);
-    }
-
-});
-
-// unsave 
-
-router.delete("/:id/save", isLogged, async (req, res, next) => {
-
-    try {
-
-        let savedPost = await SavedPost.findOneAndDelete({
-
-            user: req.user._id,
-            post: req.params.id
-
-        });
-
-
-        if (!savedPost) {
-            return res.status(404).json({
-                message: "saved post not found"
-            });
-        }
-
-
-        return res.status(200).json({
-            message: "post unsaved"
+        return res.status(201).json({
+            savedPost,
+            saved: true
         });
 
 
@@ -248,9 +227,10 @@ router.delete("/:id/save", isLogged, async (req, res, next) => {
     }
 
 });
+
 
 // show all saved
-router.get("/", isLogged, async (req, res, next) => {
+router.get("/saves", isLogged, async (req, res, next) => {
 
     try {
 

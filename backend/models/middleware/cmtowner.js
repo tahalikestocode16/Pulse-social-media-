@@ -1,6 +1,6 @@
 const express = require("express");
 const passport = require("passport");
-const Comment = require("../models/comment.js");
+const Comment = require("../comment.js");
 
 module.exports = async function isCommentOwner(req, res, next) {
   try {

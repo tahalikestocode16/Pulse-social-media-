@@ -1,9 +1,9 @@
 const express = require("express");
 const router = express.Router();
 const Report = require("../models/reportschema");
-const isAdmin = require("../middleware/admin.js");
+const isAdmin = require("../models/middleware/admin.js");
 
-const isLogged  = require("../middleware/authenticate.js");
+const isLogged  = require("../models/middleware/authenticate.js");
 
 router.post("/", isLogged, async (req, res, next) => {
     try {

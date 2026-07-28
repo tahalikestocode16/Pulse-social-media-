@@ -32,7 +32,7 @@ function Register() {
   // needs await
   const data = await response.json();
   if(response.ok) {
-     navigate("/profile");
+     navigate("/");
     //  will navigate here for pfp later
   }
   else {
@@ -53,7 +53,7 @@ function Register() {
          <h2>Register</h2>
          <input name="username" placeholder="enter username" className="username" onChange={(e) => setUsername(e.target.value)}></input>
            <input name="email" placeholder="enter email" className="email" onChange={(e)=> setEmail(e.target.value)}></input>
-             <input name="password" placeholder="enter password" className="password" onChange={(e)=> setPassword(e.target.value)}></input>
+             <input  type="password" name="password" placeholder="enter password" className="password" onChange={(e)=> setPassword(e.target.value)}></input>
          <button className="create">Create account</button>
       </form>
     </div>

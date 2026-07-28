@@ -1,46 +1,44 @@
 import { useEffect, useState } from "react";
 import Post from "./Post.jsx";
+// import useAuthUser from "../utils/authUser.jsx";
 
 function Feed() {
   const [post, setPost] = useState([]);
-  const [currentUser, setCurrentUser] = useState(null);
+  // const currentUser = useAuthUser();
 
   const getPosts = async () => {
     const response = await fetch("/posts/fyp", {
       method: "GET",
     });
     const data = await response.json();
+    console.log(data);
+setPost(data);
     if (response.ok) {
       setPost(data);
     }
   };
 
-  const getUser = async () => {
-    const response = await fetch("/users/me", {
-      method: "GET",
-    });
-    const data = await response.json();
-    if (response.ok) {
-      setCurrentUser(data);
-    }
-  };
+  
 
   useEffect(() => {
     getPosts();
-    getUser();
   }, []);
 
   return (
-    <div>
-      {post.map((p) => (
-        <Post
-          key={p._id}
-          {...p}
-          // load all data by ...p
-          currentUser={currentUser}
-          refreshComments={getPosts}
-        />
-      ))}
+    <div className="feed">
+      {post.length === 0 ? (
+        <div className="placeholder">
+        </div>
+      ) : (
+        post.map((p) => (
+          <Post
+            key={p._id}
+            {...p}
+            // currentUser={currentUser}
+            refreshComments={getPosts}
+          />
+        ))
+      )}
     </div>
   );
 }

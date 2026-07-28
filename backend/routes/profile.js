@@ -1,9 +1,9 @@
 const express = require("express");
 const router = express.Router();
 const User = require("../models/user.js");
-const isLogged = require("../middleware/authenticate.js");
-const isProfileOwner = require("../middleware/profileowner.js");
-const upload = require("../middleware/profileupload.js");
+const isLogged = require("../models/middleware/authenticate.js");
+const isProfileOwner = require("../models/middleware/profileowner.js");
+const upload = require("../models/middleware/profileupload.js");
 
 
 // view profile route

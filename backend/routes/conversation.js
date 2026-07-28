@@ -2,7 +2,7 @@ const express = require("express");
 const Conversation = require("../models/conversation.js");
 const Message = require("../models/message.js");
 const router = express.Router();
-const isLogged = require("../middleware/authenticate.js");
+const isLogged = require("../models/middleware/authenticate.js");
 
 
 // Open conversation

@@ -38,3 +38,5 @@ function CommentSection() {
     </div>
   );
 }
+
+export default CommentSection;

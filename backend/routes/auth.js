@@ -1,5 +1,5 @@
 const express = require("express");
-const User = require("../models/user");
+const User = require("../models/user.js");
 const router = express.Router();
 
 // Register route
@@ -7,20 +7,26 @@ router.post("/register", async (req, res, next)=> {
    try {
      let { username, email, password, } = req.body;
     const signedUser = new User({
-        username, 
-        email,
-        role: "user"
-    });
+    username,
+    email,
+    role: "user"
+});
+    console.log("Before register");
     await User.register(signedUser, password);
     req.login(signedUser, (err)=> {
         if(err) {
             return next(err)
         }
+        console.log("After register");
         res.status(201).json({message: `${signedUser.username} registered`})
     });
    }
     catch(err) {
-      return next(err);
+      next(err);
+       return res.status(500).json({
+        message: err.message,
+        error: err
+    });
     }
 });
 

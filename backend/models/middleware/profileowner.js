@@ -1,6 +1,6 @@
 const express = require("express");
 const passport = require("passport");
-const User = require("../models/user.js");
+const User = require("../user.js"); 
 
 module.exports = async function isProfileOwner(req, res, next) {
     try {

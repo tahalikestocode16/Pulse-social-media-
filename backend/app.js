@@ -8,7 +8,7 @@ const LocalStrategy = require("passport-local");
 const passportLocalMongoose = require('passport-local-mongoose');
 const session = require("express-session");
 const User = require("./models/user");
-const upload = require("./middleware/profileupload");
+const upload = require("./models/middleware/profileupload.js");
 
 
 // Routes
@@ -23,7 +23,7 @@ const messageRoutes = require("./routes/message.js");
 const userRoutes = require("./routes/users.js");
 
 // setup routes
-app.use("/notification", notificationRoutes);
+app.use("/notifications", notificationRoutes);
 app.use("/auth", authRoutes);
 app.use("/posts", postRoutes);
 app.use("/comments", commentRoutes);
@@ -35,7 +35,7 @@ app.use("/users", userRoutes);
 
 
 app.use(cors({
-    origin: ["http://localhost:5174"],
+    origin: ["http://localhost:5173"],
     credentials: true,
 }));
 app.use(express.urlencoded({ extended: true }));

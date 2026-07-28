@@ -3,7 +3,7 @@ const Notification = require("../models/notification.js");
 const Post = require("../models/post.js");
 const User = require("../models/user.js");
 const router = express.Router();
-const isLogged = require("../middleware/authenticate.js");
+const isLogged = require("../models/middleware/authenticate.js");
 
 
 // Show notification

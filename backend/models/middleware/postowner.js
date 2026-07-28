@@ -1,8 +1,7 @@
 const express = require("express");
 const passport = require("passport");
-const Post = require("../models/post.js");
-
-
+const Post = require("../post.js");
+ 
 module.exports = async function isPostOwner(req, res, next) {
    try {
    let post =  await Post.findById(req.params.id);

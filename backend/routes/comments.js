@@ -2,8 +2,8 @@ const express = require("express");
 const router = express.Router();
 const Post = require("../models/post.js");
 const Comment = require("../models/comment.js");
-const isLogged = require("../middleware/authenticate.js");
-const isCommentOwner = require("../middleware/cmtowner.js");
+const isLogged = require("../models/middleware/authenticate.js");
+const isCommentOwner = require("../models/middleware/cmtowner.js");
 
 // Index route
 router.get("/:postId", async (req, res, next) => {

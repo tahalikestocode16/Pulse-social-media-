@@ -1,5 +1,5 @@
 const express = require("express");
-const User = require("../models/user.js");
+const User = require("../user.js");
 
 module.exports = async function isAdmin(req, res, next) {
     if(req.user.role === "admin") {

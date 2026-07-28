@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import Post from "./Post.jsx";
+import useAuthUser from "../utils/authUser.jsx";
 
 function FollowingFeed() {
   const [post, setPost] = useState([]);
-  const [currentUser, setCurrentUser] = useState(null);
-
+  const currentUser = useAuthUser();
+  
   const getPosts = async () => {
     const response = await fetch("/posts/following", {
       method: "GET",
@@ -15,19 +16,10 @@ function FollowingFeed() {
     }
   };
 
-  const getUser = async () => {
-    const response = await fetch("/users/me", {
-      method: "GET",
-    });
-    const data = await response.json();
-    if (response.ok) {
-      setCurrentUser(data);
-    }
-  };
+  
 
   useEffect(() => {
     getPosts();
-    getUser();
   }, []);
 
   return (

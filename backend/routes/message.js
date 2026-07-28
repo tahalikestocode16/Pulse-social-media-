@@ -2,7 +2,7 @@ const express = require("express");
 const Conversation = require("../models/conversation.js");
 const Message = require("../models/message.js");
 const router = express.Router();
-const isLogged = require("../middleware/authenticate.js");
+const isLogged = require("../models/middleware/authenticate.js");
 
 // send a new message
 router.post("/:id", isLogged, async (req, res, next) => {
@@ -48,7 +48,7 @@ router.post("/:id", isLogged, async (req, res, next) => {
             text: req.body.text,
             isRead: false,
             conversation: req.params.id
-        });
+        }).populate("sender").sort({ createdAt: 1 });
 
 
         // realtime socket emit
@@ -83,7 +83,11 @@ router.get("/:id", isLogged, async (req, res, next) => {
         }
         let messages = await Message.find({
             conversation: convo._id
-        });
+        }).populate("sender").sort({ createdAt: 1 });
+        // older messages on top new on bottom
+        // hi
+        // new hi
+        
         // wo sare msg lado jisme ye convo id
 
 
@@ -100,11 +104,16 @@ router.get("/:id", isLogged, async (req, res, next) => {
 // delete messages 
 router.delete("/:id", isLogged, async (req, res, next) => {
     try {
-        let message = await Message.findOneIdAndDelete({
+        let message = await Message.findOneAndDelete({
             _id: req.params.id,
             sender: req.user._id
         });
         const io = req.app.get("io");
+        if (!message) {
+    return res.status(404).json({
+        message: "message does not exist"
+    });
+}
 
         io.to(message.conversation.toString())
             .emit("messageDeleted", {
@@ -141,6 +150,11 @@ router.patch("/:id", isLogged, async (req, res, next) => {
             }
         );
         const io = req.app.get("io");
+        if (!message) {
+    return res.status(404).json({
+        message: "message does not exist"
+    });
+}
 
         io.to(message.conversation.toString())
             .emit("messageUpdated", message);

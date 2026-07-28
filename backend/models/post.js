@@ -6,10 +6,6 @@ const postSchema = new Schema({
   title: {
     type: String,
   },
-  content: {
-    type: String,
-    required: true,
-  },
   author: {
      type: Schema.Types.ObjectId,
     ref: "User",
@@ -21,9 +17,12 @@ const postSchema = new Schema({
   }],
   mediaUrl: {
     type: String,
+    required: true,
   },
   mediaType: {
-    enum: ["image", "video"]
+    type: String,
+    enum: ["image", "video"],
+    required: true
     // enum means its allowed to have either of these two values type can either be image or video
 
   }

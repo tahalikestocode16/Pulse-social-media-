@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 
 const User = require("../models/user");
-const isLogged = require("../middleware/authenticate.js");
+const isLogged = require("../models/middleware/authenticate.js");
 
 
 // search users (last feature)
@@ -151,6 +151,6 @@ router.get("/me", isLogged, async (req, res, next)=> {
     catch(err) {
         return next(err);
     }
-})
+});
 
 module.exports = router;

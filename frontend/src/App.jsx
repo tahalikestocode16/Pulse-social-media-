@@ -1,18 +1,14 @@
-import { useState } from 'react'
-import socket from "./socket";
+import { useEffect } from 'react';
 import { RouterProvider } from 'react-router-dom';
-import Register from "./components/Register.jsx";
-
-// testing
-
-useEffect(() => {
-    console.log("socket connected");
-
-}, []);
+import router from './router.jsx';
+import './styles.css';
 
 function App() {
+  useEffect(() => {
+    console.log('socket connected');
+  }, []);
+
   return <RouterProvider router={router} />;
-  
 }
 
-export default App
+export default App;
