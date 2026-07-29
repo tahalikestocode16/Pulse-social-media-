@@ -5,7 +5,7 @@ function Post(props) {
   const [likes, setLikes] = useState(props.likes || []);
   const [user, setUser] = useState(null);
 
-   const navigate = useNavigate();
+  const navigate = useNavigate();
   const addLike = async () => {
     //   however many likes prop has or either empty array since likes are an array in our case
     const response = await fetch(`/posts/${props._id}/like`, {
@@ -20,64 +20,66 @@ function Post(props) {
     }
   };
 
-  const openComment = ()=> {
+  const openComment = () => {
     navigate(`/posts/${props._id}/comments`);
-    // setup comments 
-  }
+    // setup comments
+  };
 
-  const getEdit = ()=> {
+  const getEdit = () => {
     navigate(`/posts/${props._id}/edit`);
-  }
-  
+  };
+
   const deletePost = async () => {
     try {
       const response = await fetch(`/posts/${props._id}`, {
         method: "DELETE",
-        credentials: "include"
+        credentials: "include",
       });
-      if(response.ok) {
-        if(props.refreshPosts) {
+      if (response.ok) {
+        if (props.refreshPosts) {
           props.refreshPosts();
         }
       }
-    }
-    catch(err) {
+    } catch (err) {
       console.log(err);
     }
-  }
+  };
 
-
-  const savePost = async() => {
-    try{
+  const savePost = async () => {
+    try {
       const response = await fetch(`/posts/${props._id}/save`, {
         method: "POST",
-        credentials: "include"
+        credentials: "include",
       });
       const data = await response.json();
-      if(response.ok) {
-        if(data.saved) {
+      if (response.ok) {
+        if (data.saved) {
           // show filled bookmark function
-        }
-        else{
+        } else {
           // show unfilled bookmark
         }
       }
-    }
-    catch(err) {
+    } catch (err) {
       console.log(err);
     }
-  }
+  };
 
-  
   // agar current user exist karta hai to aur usi id author ki id ke barabar hai to render karo
 
   return (
     <div className="card">
-      <p className="author">{props.author.username}</p>
+      <p className="author">{props.author?.username || "Unknown author"}</p>
       <p onDoubleClick={addLike} className="content">
-        {props.content}
+        {props.title}
       </p>
-      {props.media && <img src={props.mediaUrl} alt="post media" />}
+
+      {/* Media block — enforces aspect ratio */}
+      {props.mediaType && props.mediaUrl && (
+        <div className="postMedia">
+          {props.mediaType === "image" && <img src={props.mediaUrl} alt="post" />}
+          {props.mediaType === "video" && <video src={props.mediaUrl} controls />}
+        </div>
+      )}
       {props.currentUser && props.author._id === props.currentUser._id && (
         <div className="actions">
           <button onClick={getEdit} className="editBtn">

@@ -50,14 +50,6 @@ function CreatePost() {
                     onChange={(e) => setTitle(e.target.value)}
                 />
 
-                <textarea
-                    className="content"
-                    name="content"
-                    placeholder="Write a caption..."
-                    value={content}
-                    onChange={(e) => setContent(e.target.value)}
-                />
-
                 <input
                     type="file"
                     accept="image/*,video/*"
