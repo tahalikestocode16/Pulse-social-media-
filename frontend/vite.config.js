@@ -11,7 +11,7 @@ export default defineConfig({
       "/comments": "http://localhost:8080",
       "/profile": "http://localhost:8080",
       "/reports": "http://localhost:8080",
-      "/notification": "http://localhost:8080",
+      "/notifications": "http://localhost:8080",
       "/conversation": "http://localhost:8080",
       "/messages": "http://localhost:8080",
       "/users": "http://localhost:8080",

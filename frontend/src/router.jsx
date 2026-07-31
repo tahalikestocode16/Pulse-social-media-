@@ -1,46 +1,103 @@
-import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import { createBrowserRouter } from 'react-router-dom';
 import Home from "./components/pages/Home.jsx";
 import Register from "./components/pages/auth/Register.jsx";
 import Login from "./components/pages/auth/Login.jsx";
-// import Profile from "./components/profile/Profile.jsx";
+import Profile from "./components/pages/profile/Profile.jsx";
+import Search from "./components/pages/Search.jsx";
 import Error from "./components/pages/Error.jsx";
-import Comment from "./components/pages/comments/CommentSection.jsx";
+import CommentSection from "./components/pages/comments/CommentSection.jsx";
 import EditPost from './components/pages/posts/EditPost.jsx';
-import Feed from "./components/pages/posts/Feed.jsx";
+import CreatePost from './components/pages/posts/CreatePost.jsx';
+import MessagesPage from './components/pages/messages/MessagesPage.jsx';
+import Notifications from './components/pages/notifications/Notifications.jsx';
+import PrivacyPolicy from './components/pages/extra/PrivacyPolicy.jsx';
+import Terms from './components/pages/extra/Terms.jsx';
+import About from './components/pages/extra/About.jsx';
+import Blog from './components/pages/extra/Blog.jsx';
+
+import Pulses from './components/pages/posts/Pulses.jsx';
+
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <Home></Home>
+    element: <Home />
+  },
+  {
+    path: "/pulses",
+    element: <Pulses />
   },
   {
     path: "/register",
-    element: <Register></Register>
+    element: <Register />
   },
   {
     path: "/login",
-    element: <Login></Login>
-  },
-  // {
-  //   path: "/profile",
-  //   element: <Profile></Profile>
-  // },
-  {
-    path: "/error",
-    element: <Error></Error>
+    element: <Login />
   },
   {
-    path: "/comment",
-    element: <Comment></Comment>
+    path: "/profile",
+    element: <Profile />
+  },
+  {
+    path: "/profile/:id",
+    element: <Profile />
+  },
+  {
+    path: "/search",
+    element: <Search />
+  },
+  {
+    path: "/explore",
+    element: <Search />
+  },
+  {
+    path: "/messages",
+    element: <MessagesPage />
+  },
+  {
+    path: "/notifications",
+    element: <Notifications />
   },
   {
     path: "/posts",
-    element: <Feed></Feed>
+    element: <Home />
+  },
+  {
+    path: "/posts/create",
+    element: <CreatePost />
+  },
+  {
+    path: "/posts/:id/comment",
+    element: <CommentSection />
   },
   {
     path: "/posts/:id/edit",
-    element: <EditPost></EditPost>
+    element: <EditPost />
+  },
+  {
+    path: "/privacy",
+    element: <PrivacyPolicy />
+  },
+  {
+    path: "/terms",
+    element: <Terms />
+  },
+  {
+    path: "/about",
+    element: <About />
+  },
+  {
+    path: "/blog",
+    element: <Blog />
+  },
+  {
+    path: "/help",
+    element: <Blog />
+  },
+  {
+    path: "/error",
+    element: <Error />
   }
-
 ]);
 
 export default router;

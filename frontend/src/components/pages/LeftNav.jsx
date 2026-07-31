@@ -18,7 +18,6 @@ const Svg = ({ children, size = 24 }) => (
 
 /* Individual icon components */
 const IcoPulse = () => (
-  /* Camera-style Pulse logo icon */
   <svg width="28" height="28" viewBox="0 0 24 24" fill="none" aria-hidden="true">
     <rect x="2" y="5" width="20" height="15" rx="3" stroke="currentColor" strokeWidth="1.75"/>
     <circle cx="12" cy="12.5" r="4" stroke="currentColor" strokeWidth="1.75"/>
@@ -62,7 +61,6 @@ const IcoReels = () => (
 
 const IcoMessages = () => (
   <Svg>
-    {/* Paper-plane DM icon */}
     <path d="M22 2L11 13"/>
     <path d="M22 2L15 22l-4-9-9-4 20-7z"/>
   </Svg>
@@ -94,50 +92,12 @@ const IcoMore = () => (
   </Svg>
 );
 
-const IcoThreads = () => (
-  /* Grid / apps icon */
-  <Svg>
-    <rect x="3" y="3" width="7" height="7" rx="1"/>
-    <rect x="14" y="3" width="7" height="7" rx="1"/>
-    <rect x="3" y="14" width="7" height="7" rx="1"/>
-    <rect x="14" y="14" width="7" height="7" rx="1"/>
-  </Svg>
-);
-
-const IcoSun = () => (
-  <Svg>
-    <circle cx="12" cy="12" r="4" fill="currentColor" />
-    <path d="M12 1.5V4" />
-    <path d="M12 20V22.5" />
-    <path d="M4.5 12H7" />
-    <path d="M17 12H19.5" />
-    <path d="M5.6 5.6L7.7 7.7" />
-    <path d="M16.3 16.3L18.4 18.4" />
-    <path d="M5.6 18.4L7.7 16.3" />
-    <path d="M16.3 7.7L18.4 5.6" />
-  </Svg>
-);
-
-const IcoPulseAlt = () => (
-  <Svg>
-    <path d="M4 12h5l3-8 4 16 3-8h4" />
-  </Svg>
-);
-
-const IcoMoon = () => (
-  <Svg>
-    <path d="M12 2a9.9 9.9 0 0 0 0 19.8 9.9 9.9 0 0 1 0-19.8z" fill="currentColor" />
-  </Svg>
-);
-
-/* ─────────────────────────────────────────────────────────────
-   Nav item definition
-───────────────────────────────────────────────────────────── */
+/* Nav item definition */
 const NAV = [
   { to: "/",             label: "Home",          Icon: IcoHome,     filledOn: "/" },
   { to: "/search",       label: "Search",        Icon: IcoSearch },
   { to: "/explore",      label: "Explore",       Icon: IcoExplore },
-  { to: "/reels",        label: "Reels",         Icon: IcoReels },
+  { to: "/pulses",       label: "Pulses",        Icon: IcoReels },
   { to: "/messages",     label: "Messages",      Icon: IcoMessages },
   { to: "/notifications",label: "Notifications", Icon: IcoNotif,    filledOn: "/notifications" },
   { to: "/posts/create", label: "Create",        Icon: IcoCreate },
@@ -149,27 +109,37 @@ const themeOptions = [
   { value: "light", label: "Light mode" },
 ];
 
-/* ─────────────────────────────────────────────────────────────
-   Component
-───────────────────────────────────────────────────────────── */
+const mobileHiddenLabels = [
+  "Explore",
+  "Messages",
+  "Notifications",
+];
+
 function LeftNav() {
   const user = useAuthUser();
   const { pathname } = useLocation();
-  const [theme, setTheme] = useState("pulse");
+  const [theme, setTheme] = useState(() => {
+    return sessionStorage.getItem("pulse_theme") || "pulse";
+  });
   const [moreOpen, setMoreOpen] = useState(false);
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
+    sessionStorage.setItem("pulse_theme", theme);
   }, [theme]);
 
   const handleThemeChange = e => {
-    setTheme(e.target.value);
+    const newTheme = e.target.value;
+    setTheme(newTheme);
+    sessionStorage.setItem("pulse_theme", newTheme);
+    document.documentElement.dataset.theme = newTheme;
+    setMoreOpen(false); // Automatically close panel on theme change!
   };
 
   const toggleMore = () => setMoreOpen(open => !open);
 
   return (
-    <nav className="leftNav">
+    <nav className="leftNav" style={{ position: 'fixed', top: 0, left: 0, bottom: 0, zIndex: 1000 }}>
       {/* Logo */}
       <Link to="/" className="leftNavLogo" aria-label="Pulse home">
         <IcoPulse />
@@ -180,11 +150,12 @@ function LeftNav() {
         {NAV.map(({ to, label, Icon, filledOn }) => {
           const isActive = pathname === to;
           const isFilled = filledOn ? pathname === filledOn : false;
+          const hiddenMobile = mobileHiddenLabels.includes(label);
           return (
             <Link
               key={to}
               to={to}
-              className={`leftNavBtn${isActive ? " active" : ""}`}
+              className={`leftNavBtn${isActive ? " active" : ""}${hiddenMobile ? " hideMobile" : ""}`}
               aria-label={label}
               title={label}
             >
@@ -228,24 +199,22 @@ function LeftNav() {
             <span className="leftNavLabel">Log in</span>
           </Link>
         )}
-
-        {/* More toggle */}
-        <button
-          className={`leftNavBtn leftNavBtn--plain${moreOpen ? " active" : ""}`}
-          type="button"
-          aria-label="More"
-          title="More"
-          onClick={toggleMore}
-        >
-          <IcoMore />
-          <span className="leftNavLabel">More</span>
-        </button>
       </div>
 
+      {/* More Options Panel */}
       <div className={`leftNavMorePanel${moreOpen ? " open" : ""}`} role="dialog" aria-hidden={!moreOpen}>
-        <div className="leftNavMoreHeader">More</div>
+        <div className="leftNavMoreHeader" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <span>More Options</span>
+          <button 
+            onClick={() => setMoreOpen(false)}
+            style={{ background: 'none', border: 'none', color: 'var(--text-3)', fontSize: '1rem', cursor: 'pointer' }}
+          >
+            ✕
+          </button>
+        </div>
+
         <div className="leftNavTheme">
-          <label htmlFor="theme-select" className="leftNavThemeLabel">Theme</label>
+          <label htmlFor="theme-select" className="leftNavThemeLabel">Choose Theme</label>
           <select
             id="theme-select"
             className="leftNavThemeSelect"
@@ -260,9 +229,12 @@ function LeftNav() {
             ))}
           </select>
         </div>
-        <Link to="/settings" className="leftNavMoreLink">Settings</Link>
-        <Link to="/privacy" className="leftNavMoreLink">Privacy policy</Link>
-        <Link to="/help" className="leftNavMoreLink">Help</Link>
+
+        <div className="leftNavMoreItems">
+          <Link to="/search" className="leftNavMoreLink" onClick={() => setMoreOpen(false)}>Search</Link>
+          <Link to="/notifications" className="leftNavMoreLink" onClick={() => setMoreOpen(false)}>Notifications</Link>
+          <Link to="/messages" className="leftNavMoreLink" onClick={() => setMoreOpen(false)}>Messages</Link>
+        </div>
       </div>
     </nav>
   );
