@@ -5,30 +5,32 @@ const User = require("../models/user");
 const isLogged = require("../models/middleware/authenticate.js");
 
 
-// search users (last feature)
-router.get("/search", isLogged, async (req, res, next) => {
+// search users (partial case-insensitive matching)
+router.get("/search", async (req, res, next) => {
     try {
-        let currentUser = await User.findById(req.user._id);
-        
-        let searchedUser = await User.findOne({
-            username: req.query.username
-        }).select("-password");
-        if (!searchedUser) {
-            return res.status(404).json({ message: "User not found" });
+        const queryTerm = req.query.username ? req.query.username.trim() : "";
+        if (!queryTerm) {
+            return res.status(200).json([]);
         }
-         let blocked =
-            currentUser.blockedUsers.some(
-                id => id.toString() === searchedUser._id.toString()
-            )
-            ||
-            searchedUser.blockedUsers.some(
-                id => id.toString() === currentUser._id.toString()
-            );
 
-        if(blocked) {
-            return res.status(403).json({message: "cannot access profile"});
+        let filter = { username: { $regex: queryTerm, $options: "i" } };
+
+        if (req.user) {
+            const currentUser = await User.findById(req.user._id);
+            if (currentUser && currentUser.blockedUsers && currentUser.blockedUsers.length > 0) {
+                filter._id = { $nin: currentUser.blockedUsers };
+            }
         }
-        return res.status(200).json(searchedUser);
+
+        const searchedUsers = await User.find(filter)
+            .select("username profilePic bio followers")
+            .limit(10);
+
+        if (!searchedUsers || searchedUsers.length === 0) {
+            return res.status(404).json({ message: "No matching users found" });
+        }
+
+        return res.status(200).json(searchedUsers);
     }
     catch (err) {
         return next(err);
@@ -149,6 +151,22 @@ router.get("/me", isLogged, async (req, res, next)=> {
       return res.status(200).json(user);
     }
     catch(err) {
+        return next(err);
+    }
+});
+
+// Suggested users — top accounts by follower count
+router.get("/suggestions", async (req, res, next) => {
+    try {
+        const matchStage = req.user ? { _id: { $ne: req.user._id } } : {};
+        const users = await User.aggregate([
+            { $match: matchStage },
+            { $project: { username: 1, profilePic: 1, bio: 1, followers: 1, followerCount: { $size: { $ifNull: ["$followers", []] } } } },
+            { $sort: { followerCount: -1 } },
+            { $limit: 8 }
+        ]);
+        return res.status(200).json(users || []);
+    } catch(err) {
         return next(err);
     }
 });

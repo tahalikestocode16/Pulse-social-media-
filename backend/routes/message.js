@@ -4,254 +4,128 @@ const Message = require("../models/message.js");
 const router = express.Router();
 const isLogged = require("../models/middleware/authenticate.js");
 
-// send a new message
+// Send a new message
 router.post("/:id", isLogged, async (req, res, next) => {
-    try {
+  try {
+    let convo = await Conversation.findById(req.params.id).populate("participants");
 
-        // find conversation
-        let convo = await Conversation.findById(req.params.id)
-            .populate("participants");
-
-
-        if (!convo) {
-            return res.status(403).json({
-                message: "conversation does not exist"
-            });
-        }
-
-
-        // find the other user in conversation
-        let otherUser = convo.participants.find(
-            user => user._id.toString() !== req.user._id.toString()
-        );
-
-
-        // block check (both directions)
-        if (
-            req.user.blockedUsers.some(
-                id => id.toString() === otherUser._id.toString()
-            )
-            ||
-            otherUser.blockedUsers.some(
-                id => id.toString() === req.user._id.toString()
-            )
-        ) {
-            return res.status(403).json({
-                message: "account unavailable"
-            });
-        }
-
-
-        // create message
-        let message = await Message.create({
-            sender: req.user._id,
-            text: req.body.text,
-            isRead: false,
-            conversation: req.params.id
-        }).populate("sender").sort({ createdAt: 1 });
-
-
-        // realtime socket emit
-        let io = req.app.get("io");
-
-        io.to(req.params.id).emit(
-            "newPulse",
-            message
-        );
-
-
-        // update conversation last message
-        convo.lastMessage = message._id;
-
-        await convo.save();
-
-
-        return res.status(201).json(message);
-
+    if (!convo) {
+      return res.status(404).json({ message: "Conversation does not exist" });
     }
-    catch (err) {
-        return next(err);
+
+    let otherUser = convo.participants.find(
+      user => user._id.toString() !== req.user._id.toString()
+    );
+
+    if (
+      otherUser &&
+      ((req.user.blockedUsers || []).some(id => id.toString() === otherUser._id.toString()) ||
+       (otherUser.blockedUsers || []).some(id => id.toString() === req.user._id.toString()))
+    ) {
+      return res.status(403).json({ message: "Account unavailable" });
     }
+
+    // Create message doc and populate sender
+    let message = await Message.create({
+      sender: req.user._id,
+      text: req.body.text,
+      isRead: false,
+      conversation: req.params.id
+    });
+
+    message = await message.populate("sender", "username profilePic");
+
+    // Realtime socket emit
+    const io = req.app.get("io");
+    if (io) {
+      io.to(req.params.id).emit("newPulse", message);
+    }
+
+    // Update conversation lastMessage & timestamp
+    convo.lastMessage = message._id;
+    await convo.save();
+
+    return res.status(201).json(message);
+  } catch (err) {
+    return next(err);
+  }
 });
-// get all messages when opening a convo
-// messages will be called pulse a new pulse eg
+
+// GET all messages in a conversation
 router.get("/:id", isLogged, async (req, res, next) => {
-    try {
-        let convo = await Conversation.findById(req.params.id);
-        if (!convo) {
-            return res.status(200).json({ message: "conversation does not exist, spark a pulse!" });
-        }
-        let messages = await Message.find({
-            conversation: convo._id
-        }).populate("sender").sort({ createdAt: 1 });
-        // older messages on top new on bottom
-        // hi
-        // new hi
-        
-        // wo sare msg lado jisme ye convo id
-
-
-        if (messages.length < 1) {
-            return res.status(200).json({ message: "no messages yet start your first conversation, beggining of a pulse!" })
-        }
-        return res.status(200).json(messages);
+  try {
+    let convo = await Conversation.findById(req.params.id);
+    if (!convo) {
+      return res.status(200).json([]);
     }
-    catch (err) {
-        return next(err);
-    }
+    let messages = await Message.find({
+      conversation: convo._id
+    }).populate("sender", "username profilePic").sort({ createdAt: 1 });
+
+    return res.status(200).json(messages || []);
+  } catch (err) {
+    return next(err);
+  }
 });
 
-// delete messages 
+// Delete message
 router.delete("/:id", isLogged, async (req, res, next) => {
-    try {
-        let message = await Message.findOneAndDelete({
-            _id: req.params.id,
-            sender: req.user._id
-        });
-        const io = req.app.get("io");
-        if (!message) {
-    return res.status(404).json({
-        message: "message does not exist"
+  try {
+    let message = await Message.findOneAndDelete({
+      _id: req.params.id,
+      sender: req.user._id
     });
-}
 
-        io.to(message.conversation.toString())
-            .emit("messageDeleted", {
-                messageId: message._id
-            });
-        //    find by delete mai agar pehle pass krdoge id to wo valiations run nahi krega isliye findONE
-        if (!message) {
-            return res.status(404).json({ message: "message does not exist" });
-        }
-        return res.status(200).json({ message: "message deleted" });
+    if (!message) {
+      return res.status(404).json({ message: "Message does not exist" });
     }
-    catch (err) {
-        return next(err);
+
+    const io = req.app.get("io");
+    if (io) {
+      io.to(message.conversation.toString()).emit("messageDeleted", {
+        messageId: message._id
+      });
     }
+
+    return res.status(200).json({ message: "Message deleted" });
+  } catch (err) {
+    return next(err);
+  }
 });
 
-// edit message
+// Edit message
 router.patch("/:id", isLogged, async (req, res, next) => {
-    try {
-        let text = req.body.text;
-        if (!text) {
-            return res.status(400).json({ message: "you didnt update anything" });
-        }
-        let message = await Message.findOneAndUpdate(
-            {
-                _id: req.params.id,
-                sender: req.user._id,
-            },
-            {
-                text: text,
-            },
-            {
-                new: true,
-            }
-        );
-        const io = req.app.get("io");
-        if (!message) {
-    return res.status(404).json({
-        message: "message does not exist"
-    });
-}
-
-        io.to(message.conversation.toString())
-            .emit("messageUpdated", message);
-        if (!message) {
-            return res.status(404).json({ message: "message not found" });
-        }
-        return res.status(200).json(message);
+  try {
+    let text = req.body.text;
+    if (!text) {
+      return res.status(400).json({ message: "You didn't update anything" });
     }
-    catch (err) {
-        return next(err);
-    }
-});
+    let message = await Message.findOneAndUpdate(
+      {
+        _id: req.params.id,
+        sender: req.user._id,
+      },
+      {
+        text: text,
+      },
+      {
+        new: true,
+      }
+    ).populate("sender", "username profilePic");
 
-router.patch("/:id/read", isLogged, async (req, res, next) => {
-
-    try {
-
-        let message = await Message.findById(req.params.id);
-
-        if (!message) {
-            return res.status(404).json({
-                message: "message not found"
-            });
-        }
-
-
-        let alreadyRead = message.readBy.find(
-            (reader) => reader.user.toString() === req.user._id.toString()
-        );
-
-
-        if (alreadyRead) {
-            return res.status(200).json({
-                message: "already read"
-            });
-        }
-
-
-        message.readBy.push({
-            user: req.user._id,
-            readAt: new Date()
-        });
-
-
-        await message.save();
-        const io = req.app.get("io");
-
-
-        io.to(message.conversation.toString())
-            .emit("messageRead", {
-                messageId: message._id,
-                userId: req.user._id,
-                readAt: new Date()
-            });
-
-
-        return res.status(200).json(message);
-
-
-    }
-    catch (err) {
-        next(err);
+    if (!message) {
+      return res.status(404).json({ message: "Message not found" });
     }
 
-});
-
-router.patch("/:conversationId/read", isLogged, async(req,res,next)=>{
-    try {
-
-        await Message.updateMany(
-            {
-                conversation: req.params.conversationId,
-                sender: { $ne: req.user._id },
-                isRead: false
-            },
-            {
-                isRead: true
-            }
-        );
-
-
-        const io = req.app.get("io");
-
-        io.to(req.params.conversationId)
-        .emit("messagesRead", {
-            userId: req.user._id
-        });
-
-
-        return res.status(200).json({
-            message:"messages marked read"
-        });
-
+    const io = req.app.get("io");
+    if (io) {
+      io.to(message.conversation.toString()).emit("messageUpdated", message);
     }
-    catch(err){
-        next(err);
-    }
+
+    return res.status(200).json(message);
+  } catch (err) {
+    return next(err);
+  }
 });
 
 module.exports = router;

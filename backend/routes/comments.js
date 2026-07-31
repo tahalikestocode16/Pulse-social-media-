@@ -4,12 +4,13 @@ const Post = require("../models/post.js");
 const Comment = require("../models/comment.js");
 const isLogged = require("../models/middleware/authenticate.js");
 const isCommentOwner = require("../models/middleware/cmtowner.js");
+const User = require("../models/user.js");
 
 // Index route
 router.get("/:postId", async (req, res, next) => {
    try {
      const comments = await Comment.find({
-        post: req.params.id
+        post: req.params.postId,
     }).populate("author");
     
   return  res.status(200).json(comments);
@@ -36,18 +37,20 @@ router.post("/posts/:postId/comment", isLogged, async (req, res, next) => {
         if (!post) {
             return res.status(404).json({ message: "post not found" });
         }
-          let blocked =
-            currentUser.blockedUsers.some(
-                id => id.toString() === post.author._id.toString()
-            )
-            ||
-            searchedUser.blockedUsers.some(
-                id => id.toString() === post.author._id.toString()
-            );
+        
+        let currentUser = await User.findById(req.user._id);
+        let postAuthor = await User.findById(post.author);
 
-            if(blocked) {
-                return res.status(403).json({message: "unable to comment"});
-            }
+        let blocked =
+            currentUser.blockedUsers.some(
+                blockedId => blockedId.toString() === post.author.toString()
+            ) || (postAuthor && postAuthor.blockedUsers.some(
+                blockedId => blockedId.toString() === currentUser._id.toString()
+            ));
+
+        if (blocked) {
+            return res.status(403).json({ message: "unable to comment" });
+        }
         await Comment.create({
             author: author,
             message: message,

@@ -11,37 +11,18 @@ const User = require("./models/user");
 const upload = require("./models/middleware/profileupload.js");
 
 
-// Routes
-const authRoutes = require("./routes/auth");
-const postRoutes = require("./routes/posts");
-const commentRoutes = require("./routes/comments");
-const profileRoutes = require("./routes/profile");
-const reportRoutes = require("./routes/report");
-const notificationRoutes = require("./routes/notificaton.js");
-const conversationRoutes = require("./routes/conversation.js");
-const messageRoutes = require("./routes/message.js");
-const userRoutes = require("./routes/users.js");
-
-// setup routes
-app.use("/notifications", notificationRoutes);
-app.use("/auth", authRoutes);
-app.use("/posts", postRoutes);
-app.use("/comments", commentRoutes);
-app.use("/profile", profileRoutes);
-app.use("/reports", reportRoutes);
-app.use("/conversation", conversationRoutes);
-app.use("/messages", messageRoutes);
-app.use("/users", userRoutes);
-
-
+// ── Middleware (MUST come before routes) ─────────────────────
+// cors must run first so the browser's preflight OPTIONS request is handled
 app.use(cors({
     origin: ["http://localhost:5173"],
     credentials: true,
 }));
-app.use(express.urlencoded({ extended: true }));
 
-app.use(express.json());
-// to read data sent from react
+// body parsers let us read req.body — routes below need this
+app.use(express.urlencoded({ extended: true, limit: "25mb" }));
+app.use(express.json({ limit: "25mb" }));
+
+// session must be before passport — passport reads the session cookie
 app.use(session({
     secret: 'pulse secretkey',
     resave: false,
@@ -52,14 +33,34 @@ app.use(session({
         sameSite: "lax"
     }
 }));
-// Session
 
-passport
+// passport must be after session
 app.use(passport.initialize());
 app.use(passport.session());
 passport.use(new LocalStrategy(User.authenticate()));
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
+
+// ── Routes (AFTER middleware) ─────────────────────────────────
+const authRoutes = require("./routes/auth");
+const postRoutes = require("./routes/posts");
+const commentRoutes = require("./routes/comments");
+const profileRoutes = require("./routes/profile");
+const reportRoutes = require("./routes/report");
+const notificationRoutes = require("./routes/notificaton.js");
+const conversationRoutes = require("./routes/conversation.js");
+const messageRoutes = require("./routes/message.js");
+const userRoutes = require("./routes/users.js");
+
+app.use("/notifications", notificationRoutes);
+app.use("/auth", authRoutes);
+app.use("/posts", postRoutes);
+app.use("/comments", commentRoutes);
+app.use("/profile", profileRoutes);
+app.use("/reports", reportRoutes);
+app.use("/conversation", conversationRoutes);
+app.use("/messages", messageRoutes);
+app.use("/users", userRoutes);
 
 async function main() {
     await mongoose.connect(MONGO_URL);

@@ -18,6 +18,13 @@ function MobileBottomNav() {
         </svg>
       </Link>
 
+      <Link to="/pulses" className={`mobileBottomNavBtn ${pathname === "/pulses" ? "active" : ""}`} aria-label="Pulses">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+          <rect x="2" y="2" width="20" height="20" rx="4"/>
+          <path d="M10 8l6 4-6 4V8z" fill="currentColor"/>
+        </svg>
+      </Link>
+
       <Link to="/posts/create" className={`mobileBottomNavBtn ${pathname === "/posts/create" ? "active" : ""}`} aria-label="Create Post">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
           <rect x="3" y="3" width="18" height="18" rx="4" />

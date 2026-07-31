@@ -2,6 +2,51 @@ import { useState, useRef, useEffect } from "react";
 import ShareModal from "./ShareModal.jsx";
 import AuthModal from "../auth/AuthModal.jsx";
 
+function ReelVideoPlayer({ src, isActive, onDoubleClick }) {
+  const videoRef = useRef(null);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    if (isActive) {
+      const playPromise = video.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(err => {
+          console.log("Autoplay prevented:", err);
+        });
+      }
+    } else {
+      video.pause();
+      video.currentTime = 0;
+    }
+  }, [isActive]);
+
+  return (
+    <video
+      ref={videoRef}
+      src={src}
+      loop
+      playsInline
+      webkit-playsinline="true"
+      x5-playsinline="true"
+      controlsList="nofullscreen noremoteplayback"
+      disablePictureInPicture
+      onDoubleClick={onDoubleClick}
+      onClick={(e) => {
+        e.preventDefault();
+        const v = e.currentTarget;
+        if (v.paused) {
+          v.play();
+        } else {
+          v.pause();
+        }
+      }}
+      style={{ width: '100%', height: '100%', objectFit: 'cover', cursor: 'pointer' }}
+    />
+  );
+}
+
 function ReelsFeedModal({ isOpen, onClose, posts = [], initialIndex = 0, currentUser, refreshPosts }) {
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const [likesMap, setLikesMap] = useState({});
@@ -14,6 +59,42 @@ function ReelsFeedModal({ isOpen, onClose, posts = [], initialIndex = 0, current
   const [modalAction, setModalAction] = useState("interact");
 
   const containerRef = useRef(null);
+
+  // IntersectionObserver to track visible post index and stop audio from previous videos
+  useEffect(() => {
+    if (!isOpen || !containerRef.current) return;
+
+    const container = containerRef.current;
+    const observerOptions = {
+      root: container,
+      threshold: 0.6
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const index = Number(entry.target.getAttribute('data-index'));
+          if (!isNaN(index)) {
+            setCurrentIndex(index);
+          }
+        }
+      });
+    }, observerOptions);
+
+    const children = Array.from(container.children);
+    children.forEach(child => observer.observe(child));
+
+    return () => {
+      observer.disconnect();
+      children.forEach(child => {
+        const video = child.querySelector('video');
+        if (video) {
+          video.pause();
+          video.currentTime = 0;
+        }
+      });
+    };
+  }, [isOpen, posts.length]);
 
   const navigateFeed = (direction) => {
     setCurrentIndex(prev => {
@@ -190,6 +271,7 @@ function ReelsFeedModal({ isOpen, onClose, posts = [], initialIndex = 0, current
       {/* Top Close Button with ESC key hint badge */}
       <button
         onClick={onClose}
+        className="reelCloseBtn"
         style={{
           position: 'fixed',
           top: '20px',
@@ -212,7 +294,7 @@ function ReelsFeedModal({ isOpen, onClose, posts = [], initialIndex = 0, current
         title="Close Reel Feed (Press ESC)"
       >
         <span style={{ fontSize: '1.1rem', lineHeight: 1 }}>✕</span>
-        <span style={{ fontSize: '0.72rem', backgroundColor: 'var(--bg-input, #132042)', color: 'var(--text-blue, #38bdf8)', padding: '2px 6px', borderRadius: '4px', border: '1px solid var(--border)' }}>ESC</span>
+        <span className="reelEscBadge" style={{ fontSize: '0.72rem', backgroundColor: 'var(--bg-input, #132042)', color: 'var(--text-blue, #38bdf8)', padding: '2px 6px', borderRadius: '4px', border: '1px solid var(--border)' }}>ESC</span>
       </button>
 
       {/* Full-Screen Instagram Reel Vertical Scroll Container */}
@@ -243,6 +325,7 @@ function ReelsFeedModal({ isOpen, onClose, posts = [], initialIndex = 0, current
           return (
             <div
               key={`${post._id}_reel_${idx}`}
+              data-index={idx}
               style={{
                 width: '100%',
                 height: '100vh',
@@ -258,13 +341,10 @@ function ReelsFeedModal({ isOpen, onClose, posts = [], initialIndex = 0, current
             >
               {/* Media Player */}
               {post.mediaType === "video" ? (
-                <video
+                <ReelVideoPlayer
                   src={post.mediaUrl}
-                  controls
-                  autoPlay={idx === currentIndex}
-                  loop
-                  playsInline
-                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                  isActive={idx === currentIndex}
+                  onDoubleClick={() => handleLike(post)}
                 />
               ) : (
                 <img
@@ -277,6 +357,7 @@ function ReelsFeedModal({ isOpen, onClose, posts = [], initialIndex = 0, current
 
               {/* Bottom Left Author & Caption Overlay */}
               <div 
+                className="reelCaptionOverlay"
                 style={{
                   position: 'absolute',
                   bottom: '76px',
@@ -329,11 +410,12 @@ function ReelsFeedModal({ isOpen, onClose, posts = [], initialIndex = 0, current
                 </div>
               </div>
 
-              {/* Bottom Right Instagram Action Column (No Circles - Pure Clean Icons & Counts) */}
+              {/* Bottom Right Instagram Action Column */}
               <div
+                className="reelActionColumn"
                 style={{
                   position: 'absolute',
-                  bottom: '50px',
+                  bottom: '76px',
                   right: '16px',
                   zIndex: 10003,
                   display: 'flex',
@@ -467,6 +549,7 @@ function ReelsFeedModal({ isOpen, onClose, posts = [], initialIndex = 0, current
 
               {/* Up & Down Scroll Arrows on the Far Right Side (Matching Instagram Reels 1:1) */}
               <div
+                className="desktopReelArrows"
                 style={{
                   position: 'fixed',
                   right: '24px',

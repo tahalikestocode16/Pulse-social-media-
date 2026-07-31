@@ -25,7 +25,10 @@ const postSchema = new Schema({
     required: true
     // enum means its allowed to have either of these two values type can either be image or video
 
-  }
+  },
+  publicId: {
+    type: String
+},
 },  {
     timestamps: true
 }

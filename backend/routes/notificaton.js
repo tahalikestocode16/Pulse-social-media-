@@ -26,12 +26,21 @@ router.get("/", isLogged, async(req, res, next)=> {
     }
 });
 
+// Mark all notifications as read
+router.patch("/read-all", isLogged, async (req, res, next) => {
+    try {
+        await Notification.updateMany({ receiver: req.user._id }, { isRead: true });
+        return res.status(200).json({ message: "All notifications marked as read" });
+    } catch (err) {
+        return next(err);
+    }
+});
+
 // Delete notification
 router.delete("/:id", isLogged, async(req, res, next)=> {
     try {
-        // we use ONE here since findbyid wont accept our queries it only accepts id
         let notifs = await Notification.findOneAndDelete({
-            id: req.params.id,
+            _id: req.params.id,
             receiver: req.user._id
         });
         if(!notifs) {

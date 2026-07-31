@@ -267,7 +267,7 @@ function Search() {
 
           {/* Suggested Accounts Section */}
           {!query.trim() && suggestions.length > 0 && (
-            <div style={{ marginTop: '16px', backgroundColor: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '14px', padding: '16px' }}>
+            <div className="suggestedAccountsBlock" style={{ marginTop: '16px', backgroundColor: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '14px', padding: '16px' }}>
               <div style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-2)', textTransform: 'uppercase', marginBottom: '12px' }}>
                 Suggested Accounts
               </div>

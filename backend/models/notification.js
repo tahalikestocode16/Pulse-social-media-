@@ -14,8 +14,13 @@ const notifSchema = new Schema({
     },
     notifType: {
         type: String,
-        enum: ["like", "comment", "follow"],
-         required: true
+        enum: ["like", "comment", "follow", "message"],
+        default: "like"
+    },
+    type: {
+        type: String,
+        enum: ["like", "comment", "follow", "message"],
+        default: "like"
     },
     isRead: {
         type: Boolean,

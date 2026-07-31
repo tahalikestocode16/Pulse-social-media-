@@ -180,7 +180,16 @@ function Post(props) {
           <img src={props.mediaUrl} alt="post" style={{ width: '100%', display: 'block', maxHeight: '580px', objectFit: 'cover' }} />
         )}
         {props.mediaType === "video" && props.mediaUrl && (
-          <video src={props.mediaUrl} controls style={{ width: '100%', display: 'block', maxHeight: '580px' }} />
+          <video
+            src={props.mediaUrl}
+            controls
+            playsInline
+            webkit-playsinline="true"
+            x5-playsinline="true"
+            controlsList="nofullscreen noremoteplayback"
+            disablePictureInPicture
+            style={{ width: '100%', display: 'block', maxHeight: '580px', objectFit: 'cover' }}
+          />
         )}
       </div>
 
