@@ -24,8 +24,7 @@ const userSchema = new Schema({
     },
     bio: {
         type: String,
-        maxLength: 64,
-        minlength: 1
+        maxLength: 500,
     } ,
     role: {
         type: String,

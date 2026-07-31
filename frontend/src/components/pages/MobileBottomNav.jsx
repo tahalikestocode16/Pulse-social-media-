@@ -10,7 +10,7 @@ function MobileBottomNav() {
           <path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H5a1 1 0 01-1-1V9.5z" />
         </svg>
       </Link>
-      
+
       <Link to="/search" className={`mobileBottomNavBtn ${pathname === "/search" ? "active" : ""}`} aria-label="Search">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
           <circle cx="11" cy="11" r="7" />
@@ -20,8 +20,8 @@ function MobileBottomNav() {
 
       <Link to="/pulses" className={`mobileBottomNavBtn ${pathname === "/pulses" ? "active" : ""}`} aria-label="Pulses">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-          <rect x="2" y="2" width="20" height="20" rx="4"/>
-          <path d="M10 8l6 4-6 4V8z" fill="currentColor"/>
+          <rect x="2" y="2" width="20" height="20" rx="4" />
+          <path d="M10 8l6 4-6 4V8z" fill="currentColor" />
         </svg>
       </Link>
 

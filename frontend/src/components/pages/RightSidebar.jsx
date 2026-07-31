@@ -29,17 +29,26 @@ function RightSidebar() {
   }, [user]);
 
   const handleFollow = async (suggestedUser) => {
-    const isFollowing = followingMap[suggestedUser._id] || suggestedUser.followers?.includes(user?._id);
+    if (!user) return;
+    const currentUserId = user._id || user;
+    const initialIsFollowing = Array.isArray(suggestedUser.followers)
+      ? suggestedUser.followers.some(f => (typeof f === 'object' ? f._id : f) === currentUserId)
+      : false;
+
+    const isFollowing = typeof followingMap[suggestedUser._id] === 'boolean'
+      ? followingMap[suggestedUser._id]
+      : initialIsFollowing;
+
     const method = isFollowing ? "DELETE" : "POST";
-    const url = isFollowing ? `/profile/${suggestedUser._id}/unfollow` : `/profile/${suggestedUser._id}/follow`;
+    const url = `/profile/${suggestedUser._id}/${isFollowing ? "unfollow" : "follow"}`;
+
+    setFollowingMap(prev => ({ ...prev, [suggestedUser._id]: !isFollowing }));
 
     try {
-      const response = await fetch(url, { method, credentials: "include" });
-      if (response.ok) {
-        setFollowingMap(prev => ({ ...prev, [suggestedUser._id]: !isFollowing }));
-      }
+      await fetch(url, { method, credentials: "include" });
     } catch (err) {
-      console.log(err);
+      console.log("Follow error:", err);
+      setFollowingMap(prev => ({ ...prev, [suggestedUser._id]: isFollowing }));
     }
   };
 
@@ -86,7 +95,14 @@ function RightSidebar() {
           </div>
         ) : (
           suggestions.map((su) => {
-            const isFollowing = followingMap[su._id] || (user && su.followers?.includes(user._id));
+            const currentUserId = user?._id || user;
+            const initialIsFollowing = Array.isArray(su.followers)
+              ? su.followers.some(f => (typeof f === 'object' ? f._id : f) === currentUserId)
+              : false;
+
+            const isFollowing = typeof followingMap[su._id] === 'boolean'
+              ? followingMap[su._id]
+              : initialIsFollowing;
 
             return (
               <div key={su._id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>

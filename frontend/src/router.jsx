@@ -17,6 +17,8 @@ import Blog from './components/pages/extra/Blog.jsx';
 
 import Pulses from './components/pages/posts/Pulses.jsx';
 
+import EditProfile from './components/pages/profile/EditProfile.jsx';
+
 const router = createBrowserRouter([
   {
     path: "/",
@@ -37,6 +39,10 @@ const router = createBrowserRouter([
   {
     path: "/profile",
     element: <Profile />
+  },
+  {
+    path: "/profile/edit",
+    element: <EditProfile />
   },
   {
     path: "/profile/:id",
@@ -96,6 +102,10 @@ const router = createBrowserRouter([
   },
   {
     path: "/error",
+    element: <Error />
+  },
+  {
+    path: "*",
     element: <Error />
   }
 ]);

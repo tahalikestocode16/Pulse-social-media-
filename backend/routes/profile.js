@@ -41,41 +41,96 @@ router.get("/:id", async (req, res, next) => {
 
 
 
-// edit profile
-// accept one profile pic 
-router.patch("/edit", isLogged, isProfileOwner, upload.single("profilePic"), async (req, res, next)=> {
+// edit profile (updates username, bio, email, profilePic stored in Cloudinary)
+router.patch("/edit", isLogged, isProfileOwner, (req, res, next) => {
+    upload.single("profilePic")(req, res, (err) => {
+        if (err) {
+            console.log("Multer upload error:", err);
+        }
+        next();
+    });
+}, async (req, res, next) => {
     try {
-        console.log(req.file);
         let updates = {};
 
-    if(req.body.username !== undefined) {
-        updates.username = req.body.username;
-    }
-     if(req.body.bio !== undefined) {
-        updates.bio = req.body.bio;
-    }
-    // here we use undefined comparision because req.body wil always exist we have to see if it
-    // has anything inside it
+        if (req.body.username !== undefined && req.body.username.trim()) {
+            updates.username = req.body.username.trim();
+        }
+        if (req.body.bio !== undefined) {
+            updates.bio = req.body.bio;
+        }
+        if (req.body.email !== undefined && req.body.email.trim()) {
+            updates.email = req.body.email.trim();
+        }
 
-    if(req.file) {
-        updates.profilePic = req.file.path;
+        if (req.file) {
+            const fileUrl = req.file.path || req.file.secure_url || req.file.url;
+            if (fileUrl) {
+                updates.profilePic = fileUrl;
+            } else if (req.file.buffer) {
+                try {
+                    const { cloudinary } = require("../config/cloudinary");
+                    const uploadPromise = new Promise((resolve, reject) => {
+                        const stream = cloudinary.uploader.upload_stream(
+                            { folder: "pulse-profile-pictures", resource_type: "image" },
+                            (error, result) => {
+                                if (error) reject(error);
+                                else resolve(result);
+                            }
+                        );
+                        stream.end(req.file.buffer);
+                    });
+                    const result = await uploadPromise;
+                    if (result && result.secure_url) {
+                        updates.profilePic = result.secure_url;
+                    }
+                } catch (bErr) {
+                    console.log("Buffer upload error:", bErr);
+                }
+            }
+        }
+
+        const picInput = req.body.profilePicData || req.body.profilePic;
+        if (!updates.profilePic && picInput) {
+            if (typeof picInput === "string" && picInput.startsWith("data:")) {
+                try {
+                    const { cloudinary } = require("../config/cloudinary");
+                    const uploadResult = await cloudinary.uploader.upload(picInput, {
+                        folder: "pulse-profile-pictures",
+                        resource_type: "image"
+                    });
+                    if (uploadResult && uploadResult.secure_url) {
+                        updates.profilePic = uploadResult.secure_url;
+                    } else {
+                        updates.profilePic = picInput;
+                    }
+                } catch (cErr) {
+                    console.log("Cloudinary pfp upload error:", cErr);
+                    updates.profilePic = picInput;
+                }
+            } else if (typeof picInput === "string" && picInput.length > 5) {
+                updates.profilePic = picInput;
+            }
+        }
+
+        console.log("Saving user profile updates:", updates);
+        const updatedUser = await User.findByIdAndUpdate(req.user._id, {
+            $set: updates
+        }, {
+            runValidators: true,
+            new: true
+        }).select("-password");
+
+        req.login(updatedUser, (loginErr) => {
+            if (loginErr) {
+                console.log("Passport session refresh error:", loginErr);
+            }
+            return res.status(200).json(updatedUser);
+        });
+    } catch (err) {
+        console.log("Profile edit error:", err);
+        return res.status(500).json({ message: err.message || "Failed to update profile" });
     }
-    // req.file comes from cloudinary after we upload the image so if no image no Route btu can write
-    // req.file !== undefined it will do the exact same thing
-    //  removed pfp route due to using multer
-    const updatedUser = await User.findByIdAndUpdate(req.user._id, {
-        $set: updates
-    },
-    {
-        runValidators: true,
-        new: true
-    });
-     res.status(200).json(updatedUser);
-    }
-    catch(err) {
-        next(err);
-    }
-   
 });
 // set and updates is a function of js that updates the given value using it with if makes it if that
 // value was changed it will be updates, and !== undefined will make sure to handle if the input is invalid

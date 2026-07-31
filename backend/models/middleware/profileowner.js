@@ -4,14 +4,17 @@ const User = require("../user.js");
 
 module.exports = async function isProfileOwner(req, res, next) {
     try {
-        const user = await User.findById(req.params.id);
-        if(!user) return res.status(404).json({message: "user does not exist"});
+        const targetId = req.params.id || req.user?._id;
+        if (!targetId) return res.status(400).json({ message: "User ID required" });
 
-        if(req.user._id.equals(user._id)) return next();
-        return res.status(403).json({message: "Access denied unauthorized user"});
+        const user = await User.findById(targetId);
+        if (!user) return res.status(404).json({ message: "user does not exist" });
+
+        if (req.user && req.user._id.equals(user._id)) return next();
+        return res.status(403).json({ message: "Access denied unauthorized user" });
     }
     catch(err) {
-        res.status(404).json({message: "profile not found inavlid credentials"});
+        res.status(404).json({ message: "profile not found inavlid credentials" });
     }
 };
 

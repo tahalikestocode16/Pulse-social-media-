@@ -173,9 +173,9 @@ function Profile() {
         ) : (
           <>
             {/* Instagram Profile Header */}
-            <div style={{ display: 'flex', gap: '40px', alignItems: 'center', marginBottom: '44px', flexWrap: 'wrap' }}>
-              <div style={{ flexShrink: 0, margin: '0 auto' }}>
-                <div className="storyRing" style={{ width: '150px', height: '150px', padding: '3px' }}>
+            <div className="profileHeaderContainer" style={{ display: 'flex', gap: '40px', alignItems: 'center', marginBottom: '44px', flexWrap: 'wrap' }}>
+              <div style={{ flexShrink: 0 }}>
+                <div className="storyRing profileStoryRing" style={{ width: '150px', height: '150px', padding: '3px' }}>
                   <img 
                     src={profile.profilePic || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80"} 
                     alt={profile.username} 
@@ -184,11 +184,11 @@ function Profile() {
                 </div>
               </div>
               
-              <div style={{ flex: 1, minWidth: '280px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginBottom: '20px', flexWrap: 'wrap' }}>
+              <div className="profileInfoWrapper" style={{ flex: 1, minWidth: '280px' }}>
+                <div className="profileUsernameRow" style={{ display: 'flex', alignItems: 'center', gap: '20px', marginBottom: '20px', flexWrap: 'wrap' }}>
                   <h1 style={{ margin: 0, fontWeight: 300, fontSize: '1.75rem', color: 'var(--text-1)' }}>{profile.username}</h1>
                   {isOwner ? (
-                    <button onClick={() => navigate('/settings')} className="sideRegisterBtn" style={{ padding: '7px 18px', fontSize: '0.85rem' }}>
+                    <button onClick={() => navigate('/profile/edit')} className="sideRegisterBtn" style={{ padding: '7px 18px', fontSize: '0.85rem' }}>
                       Edit profile
                     </button>
                   ) : (
@@ -212,7 +212,7 @@ function Profile() {
                 </div>
                 
                 {/* Interactive Stats Row */}
-                <div style={{ display: 'flex', gap: '40px', marginBottom: '20px', fontSize: '1rem', color: 'var(--text-1)' }}>
+                <div className="profileStatsRow" style={{ display: 'flex', gap: '40px', marginBottom: '20px', fontSize: '1rem', color: 'var(--text-1)' }}>
                   <span><strong>{profile.posts?.length || 0}</strong> posts</span>
                   <span onClick={() => openFollowModal("followers")} style={{ cursor: 'pointer' }}>
                     <strong>{profile.followers?.length || 0}</strong> followers
@@ -285,7 +285,7 @@ function Profile() {
             {/* Posts Grid Tab */}
             {activeTab === "grid" && (
               profile.posts?.length > 0 ? (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
+                <div className="profileGrid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
                   {profile.posts.map((post, idx) => (
                     <div 
                       key={post._id || post}
@@ -327,7 +327,7 @@ function Profile() {
               loadingSaved ? (
                 <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--text-3)' }}>Loading saved posts...</div>
               ) : savedPosts.length > 0 ? (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
+                <div className="profileGrid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
                   {savedPosts.map((post) => (
                     <div 
                       key={post._id}

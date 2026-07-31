@@ -67,30 +67,38 @@ router.post("/posts/:postId/comment", isLogged, async (req, res, next) => {
 router.patch("/:id", isLogged, isCommentOwner, async (req, res, next) => {
     try {
         let { id } = req.params;
-        let message = req.body.message
-        if (!message) {
-            return res.status(404).json({ message: "invalid request" });
+        let message = req.body.message;
+        if (!message || !message.trim()) {
+            return res.status(400).json({ message: "Comment message cannot be empty" });
         }
-        let comment = await Comment.findByIdAndUpdate(id,
-            { message },
+        let comment = await Comment.findByIdAndUpdate(
+            id,
+            { message: message.trim() },
             { new: true, runValidators: true }
-        );
+        ).populate("author");
 
         if (!comment) {
-            return res.status(404).json({ message: "comment does not exist" });
+            return res.status(404).json({ message: "Comment does not exist" });
         }
-        return res.status(200).json({ message: "comment updated" });
+        return res.status(200).json({ message: "Comment updated", comment });
     }
     catch (err) {
         return next(err);
     }
-})
+});
 
 // Delete route
-router.delete("/:id", isLogged, isCommentOwner, async (req, res) => {
-    let { id } = req.body;
-    await Comment.findByIdAndDelete(id);
-    res.json({ message: "Comment deleted" });
-
+router.delete("/:id", isLogged, isCommentOwner, async (req, res, next) => {
+    try {
+        let { id } = req.params;
+        let deletedComment = await Comment.findByIdAndDelete(id);
+        if (!deletedComment) {
+            return res.status(404).json({ message: "Comment not found" });
+        }
+        return res.status(200).json({ message: "Comment deleted" });
+    } catch (err) {
+        return next(err);
+    }
 });
+
 module.exports = router;

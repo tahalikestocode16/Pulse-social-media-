@@ -2,20 +2,27 @@
 
 const multer = require("multer");
 const { CloudinaryStorage } = require("multer-storage-cloudinary");
-const cloudinary = require("../../config/cloudinary.js");
+const { cloudinary } = require("../../config/cloudinary.js");
 
-const storage = new CloudinaryStorage({
-    cloudinary: cloudinary,
-    params: {
-        folder: "pulse/profile-pictures",
-        allowed_formats: ["jpg", "jpeg", "png", "webp"],
-    },
-});
+let storage;
+try {
+    storage = new CloudinaryStorage({
+        cloudinary: cloudinary,
+        params: async (req, file) => ({
+            folder: "pulse-profile-pictures",
+            resource_type: "image",
+            allowed_formats: ["jpg", "jpeg", "png", "webp", "gif"]
+        })
+    });
+} catch (e) {
+    storage = multer.memoryStorage();
+}
 
-const upload = multer({ storage,
-      limits: {
-        fileSize: 5 * 1024 * 1024 // 5 MB
+const upload = multer({ 
+    storage,
+    limits: {
+        fileSize: 10 * 1024 * 1024 // 10 MB
     }
- });
+});
 
 module.exports = upload;

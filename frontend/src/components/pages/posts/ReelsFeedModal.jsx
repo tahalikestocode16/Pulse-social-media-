@@ -1,6 +1,8 @@
 import { useState, useRef, useEffect } from "react";
+import { Link } from "react-router-dom";
 import ShareModal from "./ShareModal.jsx";
 import AuthModal from "../auth/AuthModal.jsx";
+import LeftNav from "../LeftNav.jsx";
 
 function ReelVideoPlayer({ src, isActive, onDoubleClick }) {
   const videoRef = useRef(null);
@@ -51,6 +53,7 @@ function ReelsFeedModal({ isOpen, onClose, posts = [], initialIndex = 0, current
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const [likesMap, setLikesMap] = useState({});
   const [savedMap, setSavedMap] = useState({});
+  const [followingMap, setFollowingMap] = useState({});
   const [activeSharePost, setActiveSharePost] = useState(null);
   const [activeCommentPost, setActiveCommentPost] = useState(null);
   const [commentText, setCommentText] = useState("");
@@ -241,6 +244,37 @@ function ReelsFeedModal({ isOpen, onClose, posts = [], initialIndex = 0, current
     }
   };
 
+  const handleFollowToggle = async (authorId) => {
+    if (!currentUser) {
+      setModalAction("follow users");
+      setAuthModalOpen(true);
+      return;
+    }
+
+    const currentUserId = currentUser._id || currentUser;
+    const authorPost = posts.find(p => p.author?._id === authorId);
+    const initialIsFollowing = Array.isArray(authorPost?.author?.followers)
+      ? authorPost.author.followers.some(f => (typeof f === 'object' ? f._id : f) === currentUserId)
+      : false;
+
+    const isFollowing = typeof followingMap[authorId] === 'boolean'
+      ? followingMap[authorId]
+      : initialIsFollowing;
+
+    const method = isFollowing ? "DELETE" : "POST";
+    const endpoint = `/profile/${authorId}/${isFollowing ? "unfollow" : "follow"}`;
+
+    setFollowingMap(prev => ({ ...prev, [authorId]: !isFollowing }));
+
+    try {
+      await fetch(endpoint, { method, credentials: "include" });
+      if (refreshPosts) refreshPosts();
+    } catch (err) {
+      console.log("Reel follow error:", err);
+      setFollowingMap(prev => ({ ...prev, [authorId]: isFollowing }));
+    }
+  };
+
   const currentUserId = currentUser?._id || currentUser;
 
   return (
@@ -255,6 +289,43 @@ function ReelsFeedModal({ isOpen, onClose, posts = [], initialIndex = 0, current
         justifyContent: 'center'
       }}
     >
+      {/* Desktop Left Sidebar on Pulses page */}
+      <div className="desktopReelNav" style={{ position: 'fixed', top: 0, left: 0, bottom: 0, zIndex: 10006 }}>
+        <LeftNav />
+      </div>
+
+      {/* Desktop Floating Messages Button */}
+      <Link
+        to="/messages"
+        className="desktopReelMessagesBtn"
+        style={{
+          position: 'fixed',
+          bottom: '24px',
+          right: '28px',
+          zIndex: 10006,
+          background: 'var(--bg-card, #0c152e)',
+          border: '1px solid var(--border, rgba(56, 189, 248, 0.2))',
+          color: 'var(--text-1, #ffffff)',
+          padding: '10px 20px',
+          borderRadius: '30px',
+          fontSize: '0.88rem',
+          fontWeight: 700,
+          cursor: 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '10px',
+          backdropFilter: 'blur(16px)',
+          boxShadow: 'var(--shadow-md, 0 8px 30px rgba(0,0,0,0.8))',
+          textDecoration: 'none'
+        }}
+      >
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <path d="M22 2L11 13" />
+          <path d="M22 2L15 22l-4-9-9-4 20-7z" />
+        </svg>
+        <span>Messages</span>
+      </Link>
+
       <AuthModal 
         isOpen={authModalOpen} 
         onClose={() => setAuthModalOpen(false)} 
@@ -380,28 +451,35 @@ function ReelsFeedModal({ isOpen, onClose, posts = [], initialIndex = 0, current
                   <span style={{ fontWeight: 700, fontSize: '0.95rem', color: '#ffffff' }}>
                     {post.author?.username || "Pulse User"}
                   </span>
-                  <button 
-                    onClick={async () => {
-                      if (post.author?._id && currentUser) {
-                        try {
-                          await fetch(`/profile/${post.author._id}/follow`, { method: 'POST', credentials: 'include' });
-                        } catch(e) {}
-                      }
-                    }}
-                    style={{
-                      fontSize: '0.75rem',
-                      color: '#ffffff',
-                      background: 'rgba(0, 149, 246, 0.85)',
-                      border: 'none',
-                      padding: '4px 12px',
-                      borderRadius: '14px',
-                      fontWeight: 700,
-                      cursor: 'pointer',
-                      backdropFilter: 'blur(8px)'
-                    }}
-                  >
-                    Follow
-                  </button>
+                  {post.author?._id && ((post.author._id || post.author) !== (currentUser?._id || currentUser)) && (() => {
+                    const authorId = post.author._id;
+                    const initialIsFollowing = Array.isArray(post.author.followers)
+                      ? post.author.followers.some(f => (typeof f === 'object' ? f._id : f) === (currentUser?._id || currentUser))
+                      : false;
+                    const isFollowing = typeof followingMap[authorId] === 'boolean'
+                      ? followingMap[authorId]
+                      : initialIsFollowing;
+
+                    return (
+                      <button 
+                        onClick={() => handleFollowToggle(authorId)}
+                        style={{
+                          fontSize: '0.75rem',
+                          color: '#ffffff',
+                          background: isFollowing ? 'rgba(255, 255, 255, 0.25)' : 'rgba(0, 149, 246, 0.9)',
+                          border: 'none',
+                          padding: '4px 14px',
+                          borderRadius: '14px',
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                          backdropFilter: 'blur(8px)',
+                          transition: 'background 0.15s ease'
+                        }}
+                      >
+                        {isFollowing ? 'Following' : 'Follow'}
+                      </button>
+                    );
+                  })()}
                 </div>
 
                 {/* Caption Title */}
