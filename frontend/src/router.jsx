@@ -14,99 +14,103 @@ import PrivacyPolicy from './components/pages/extra/PrivacyPolicy.jsx';
 import Terms from './components/pages/extra/Terms.jsx';
 import About from './components/pages/extra/About.jsx';
 import Blog from './components/pages/extra/Blog.jsx';
-
+import Help from './components/pages/extra/Help.jsx';
 import Pulses from './components/pages/posts/Pulses.jsx';
-
 import EditProfile from './components/pages/profile/EditProfile.jsx';
 
 const router = createBrowserRouter([
   {
-    path: "/",
-    element: <Home />
-  },
-  {
-    path: "/pulses",
-    element: <Pulses />
-  },
-  {
-    path: "/register",
-    element: <Register />
-  },
-  {
-    path: "/login",
-    element: <Login />
-  },
-  {
-    path: "/profile",
-    element: <Profile />
-  },
-  {
-    path: "/profile/edit",
-    element: <EditProfile />
-  },
-  {
-    path: "/profile/:id",
-    element: <Profile />
-  },
-  {
-    path: "/search",
-    element: <Search />
-  },
-  {
-    path: "/explore",
-    element: <Search />
-  },
-  {
-    path: "/messages",
-    element: <MessagesPage />
-  },
-  {
-    path: "/notifications",
-    element: <Notifications />
-  },
-  {
-    path: "/posts",
-    element: <Home />
-  },
-  {
-    path: "/posts/create",
-    element: <CreatePost />
-  },
-  {
-    path: "/posts/:id/comment",
-    element: <CommentSection />
-  },
-  {
-    path: "/posts/:id/edit",
-    element: <EditPost />
-  },
-  {
-    path: "/privacy",
-    element: <PrivacyPolicy />
-  },
-  {
-    path: "/terms",
-    element: <Terms />
-  },
-  {
-    path: "/about",
-    element: <About />
-  },
-  {
-    path: "/blog",
-    element: <Blog />
-  },
-  {
-    path: "/help",
-    element: <Blog />
-  },
-  {
-    path: "/error",
-    element: <Error />
-  },
-  {
-    path: "*",
-    element: <Error />
+    errorElement: <Error />,
+    children: [
+      {
+        path: "/",
+        element: <Home />
+      },
+      {
+        path: "/pulses",
+        element: <Pulses />
+      },
+      {
+        path: "/register",
+        element: <Register />
+      },
+      {
+        path: "/login",
+        element: <Login />
+      },
+      {
+        path: "/profile",
+        element: <Profile />
+      },
+      {
+        path: "/profile/edit",
+        element: <EditProfile />
+      },
+      {
+        path: "/profile/:id",
+        element: <Profile />
+      },
+      {
+        path: "/search",
+        element: <Search />
+      },
+      {
+        path: "/explore",
+        element: <Search />
+      },
+      {
+        path: "/messages",
+        element: <MessagesPage />
+      },
+      {
+        path: "/notifications",
+        element: <Notifications />
+      },
+      {
+        path: "/posts",
+        element: <Home />
+      },
+      {
+        path: "/posts/create",
+        element: <CreatePost />
+      },
+      {
+        path: "/posts/:id/comment",
+        element: <CommentSection />
+      },
+      {
+        path: "/posts/:id/edit",
+        element: <EditPost />
+      },
+      {
+        path: "/privacy",
+        element: <PrivacyPolicy />
+      },
+      {
+        path: "/terms",
+        element: <Terms />
+      },
+      {
+        path: "/about",
+        element: <About />
+      },
+      {
+        path: "/blog",
+        element: <Blog />
+      },
+      {
+        path: "/help",
+        element: <Help />
+      },
+      {
+        path: "/error",
+        element: <Error />
+      },
+      {
+        path: "*",
+        element: <Error />
+      }
+    ]
   }
 ]);
 

@@ -32,7 +32,7 @@ const BLOG_POSTS = [
     author: "Pulse Security Team",
     readTime: "5 min read",
     summary: "A deep dive into our end-to-end security architecture, session protection, and content safety tools designed to keep your social experience respectful.",
-    image: "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?w=800&auto=format&fit=crop&q=80"
+    image: "https://images.unsplash.com/photo-1563986768609-322da13575f3?w=800&auto=format&fit=crop&q=80"
   }
 ];
 

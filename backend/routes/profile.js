@@ -22,6 +22,21 @@ router.get("/me", isLogged, async (req, res, next) => {
     }
 });
 
+router.get("/", isLogged, async (req, res, next) => {
+    try {
+        let profile = await User.findById(req.user._id).select("-password").lean();
+        if (!profile) {
+            return res.status(404).json({ message: "User not found" });
+        }
+        const Post = require("../models/post.js");
+        let posts = await Post.find({ author: req.user._id }).sort({ createdAt: -1 });
+        profile.posts = posts;
+        return res.status(200).json(profile);
+    } catch (err) {
+        return next(err);
+    }
+});
+
 // view profile by ID route
 router.get("/:id", async (req, res, next) => {
     try {
@@ -68,47 +83,52 @@ router.patch("/edit", isLogged, isProfileOwner, (req, res, next) => {
             if (fileUrl) {
                 updates.profilePic = fileUrl;
             } else if (req.file.buffer) {
-                try {
-                    const { cloudinary } = require("../config/cloudinary");
-                    const uploadPromise = new Promise((resolve, reject) => {
-                        const stream = cloudinary.uploader.upload_stream(
-                            { folder: "pulse-profile-pictures", resource_type: "image" },
-                            (error, result) => {
-                                if (error) reject(error);
-                                else resolve(result);
-                            }
-                        );
-                        stream.end(req.file.buffer);
-                    });
-                    const result = await uploadPromise;
-                    if (result && result.secure_url) {
-                        updates.profilePic = result.secure_url;
+                let uploadedUrl = null;
+                if (process.env.CLOUD_NAME && process.env.API_KEY) {
+                    try {
+                        const { cloudinary } = require("../config/cloudinary");
+                        const result = await new Promise((resolve, reject) => {
+                            const stream = cloudinary.uploader.upload_stream(
+                                { folder: "pulse-profile-pictures", resource_type: "image" },
+                                (error, resObj) => (error ? reject(error) : resolve(resObj))
+                            );
+                            stream.end(req.file.buffer);
+                        });
+                        if (result && result.secure_url) {
+                            uploadedUrl = result.secure_url;
+                        }
+                    } catch (bErr) {
+                        console.log("Cloudinary buffer upload error:", bErr.message);
                     }
-                } catch (bErr) {
-                    console.log("Buffer upload error:", bErr);
                 }
+                if (!uploadedUrl) {
+                    const mime = req.file.mimetype || "image/jpeg";
+                    uploadedUrl = `data:${mime};base64,${req.file.buffer.toString("base64")}`;
+                }
+                updates.profilePic = uploadedUrl;
             }
         }
 
         const picInput = req.body.profilePicData || req.body.profilePic;
-        if (!updates.profilePic && picInput) {
-            if (typeof picInput === "string" && picInput.startsWith("data:")) {
-                try {
-                    const { cloudinary } = require("../config/cloudinary");
-                    const uploadResult = await cloudinary.uploader.upload(picInput, {
-                        folder: "pulse-profile-pictures",
-                        resource_type: "image"
-                    });
-                    if (uploadResult && uploadResult.secure_url) {
-                        updates.profilePic = uploadResult.secure_url;
-                    } else {
-                        updates.profilePic = picInput;
+        if (!updates.profilePic && picInput && typeof picInput === "string") {
+            if (picInput.startsWith("data:")) {
+                let uploadedUrl = null;
+                if (process.env.CLOUD_NAME && process.env.API_KEY) {
+                    try {
+                        const { cloudinary } = require("../config/cloudinary");
+                        const uploadResult = await cloudinary.uploader.upload(picInput, {
+                            folder: "pulse-profile-pictures",
+                            resource_type: "image"
+                        });
+                        if (uploadResult && uploadResult.secure_url) {
+                            uploadedUrl = uploadResult.secure_url;
+                        }
+                    } catch (cErr) {
+                        console.log("Cloudinary data URL upload error:", cErr.message);
                     }
-                } catch (cErr) {
-                    console.log("Cloudinary pfp upload error:", cErr);
-                    updates.profilePic = picInput;
                 }
-            } else if (typeof picInput === "string" && picInput.length > 5) {
+                updates.profilePic = uploadedUrl || picInput;
+            } else if (picInput.length > 5) {
                 updates.profilePic = picInput;
             }
         }
@@ -138,18 +158,18 @@ router.patch("/edit", isLogged, isProfileOwner, (req, res, next) => {
 
 
 // delete account route
-router.delete("/delete", isLogged, isProfileOwner, async (req, res, next)=> {
+router.delete("/delete", isLogged, isProfileOwner, async (req, res, next) => {
     try {
         let user = await User.findByIdAndDelete(req.user._id);
-        if(!user) {
-            return res.status(404).json({message: "user not found errorcode 404"});
+        if (!user) {
+            return res.status(404).json({ message: "user not found errorcode 404" });
         }
-       return res.status(200).json({message: "succesfully deleted your account"});
+        return res.status(200).json({ message: "succesfully deleted your account" });
     }
-    catch(err) {
+    catch (err) {
         return next(err);
     }
-  
+
 });
 // in future i will add a popup in frontend that asks if youre sure
 
@@ -165,82 +185,82 @@ router.delete("/delete", isLogged, isProfileOwner, async (req, res, next)=> {
 
 // =================================== FOLLOWING AND FOLLOWERS ================================
 
-router.post("/:id/follow", isLogged, async (req, res, next)=> {
-   try {
-        const toFollow = await User.findById(req.params.id);
-    const Follower = await User.findById(req.user._id);
-
-    if(!toFollow) {
-        return res.status(404).json({message: "user not found"});
-    }
-
-    if(req.user._id.equals(req.params.id)) {
-        return res.status(403).json({message: "you cant follow yourself"});
-    }
-
-    if(Follower.following.some(id => id.equals(req.params.id))) {
-       return res.status(403).json({message: "already following"});
-    //    id here is not syntax write whatever you want
-    }
-    // return on errors is needed else it will execute the code ahead even the success responses
-
-    Follower.following.push(toFollow._id);
-    toFollow.followers.push(Follower._id);
-
-    await Follower.save();
-    await toFollow.save();
-
+router.post("/:id/follow", isLogged, async (req, res, next) => {
     try {
-        const Notification = require("../models/notification.js");
-        await Notification.create({
-            sender: req.user._id,
-            receiver: toFollow._id,
-            notifType: "follow",
-            type: "follow",
-        });
-    } catch(notifErr) {
-        console.log("Follow notification error:", notifErr);
-    }
+        const toFollow = await User.findById(req.params.id);
+        const Follower = await User.findById(req.user._id);
 
-   return res.status(200).json({message : "following"});
-}
-    catch(err) {
+        if (!toFollow) {
+            return res.status(404).json({ message: "user not found" });
+        }
+
+        if (req.user._id.equals(req.params.id)) {
+            return res.status(403).json({ message: "you cant follow yourself" });
+        }
+
+        if (Follower.following.some(id => id.equals(req.params.id))) {
+            return res.status(403).json({ message: "already following" });
+            //    id here is not syntax write whatever you want
+        }
+        // return on errors is needed else it will execute the code ahead even the success responses
+
+        Follower.following.push(toFollow._id);
+        toFollow.followers.push(Follower._id);
+
+        await Follower.save();
+        await toFollow.save();
+
+        try {
+            const Notification = require("../models/notification.js");
+            await Notification.create({
+                sender: req.user._id,
+                receiver: toFollow._id,
+                notifType: "follow",
+                type: "follow",
+            });
+        } catch (notifErr) {
+            console.log("Follow notification error:", notifErr);
+        }
+
+        return res.status(200).json({ message: "following" });
+    }
+    catch (err) {
         return next(err);
     };
 });
 
 
 // unfollow route
-router.delete("/:id/unfollow", isLogged, async (req, res, next)=> {
-   try {
-     const toUnfollow = await User.findById(req.params.id);
-     const currentUser = await User.findById(req.user._id);
-     
-     if(!toUnfollow) {
-        return res.status(404).json({message: "no user defined"});
-     }
-     if(!currentUser.following.some(id => id.equals(req.params.id))) {
-        return res.status(400).json({message: "you arent following this user"});
-     }
-     if(req.user._id.equals(req.params.id)) {
-        return res.status(403).json({message: "you cant unfollow yourself"});
-     }
-       currentUser.following.pull(toUnfollow._id);
-       toUnfollow.followers.pull(req.user._id);
+router.delete("/:id/unfollow", isLogged, async (req, res, next) => {
+    try {
+        const toUnfollow = await User.findById(req.params.id);
+        const currentUser = await User.findById(req.user._id);
 
-       await currentUser.save();
-       await toUnfollow.save();
+        if (!toUnfollow) {
+            return res.status(404).json({ message: "no user defined" });
+        }
+        if (!currentUser.following.some(id => id.equals(req.params.id))) {
+            return res.status(400).json({ message: "you arent following this user" });
+        }
+        if (req.user._id.equals(req.params.id)) {
+            return res.status(403).json({ message: "you cant unfollow yourself" });
+        }
+        currentUser.following.pull(toUnfollow._id);
+        toUnfollow.followers.pull(req.user._id);
 
-        return res.status(200).json({message: "unfollowed"});
-     
-   } catch(err) {
-      return next(err);
-   }
+        await currentUser.save();
+        await toUnfollow.save();
+
+        return res.status(200).json({ message: "unfollowed" });
+
+    } catch (err) {
+        return next(err);
+    }
 });
 
 // block route
-router.post("/:id/block", isLogged, async(req, res, next)=> {
-    res.json({message: "under development"})
+router.post("/:id/block", isLogged, async (req, res, next) => {
+    res.json({ message: "under development" })
 });
 
 // GET user's followers list

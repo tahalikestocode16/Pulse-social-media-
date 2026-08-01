@@ -78,7 +78,7 @@ function EditPost() {
       <div className="mobileHeaderOnly">
         <MobileHeader />
       </div>
-      
+
       <LeftNav />
 
       <main style={{

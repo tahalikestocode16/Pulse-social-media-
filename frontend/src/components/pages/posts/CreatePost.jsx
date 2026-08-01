@@ -59,7 +59,7 @@ function CreatePost() {
 
   const onSubmit = async (event) => {
     if (event) event.preventDefault();
-    
+
     if (!currentUser) {
       setAuthModalOpen(true);
       return;
@@ -78,6 +78,9 @@ function CreatePost() {
       formData.append("title", title || "Pulse Post");
       if (media) {
         formData.append("media", media);
+      }
+      if (preview && preview.startsWith("data:")) {
+        formData.append("mediaData", preview);
       }
 
       const response = await fetch("/posts/create", {
@@ -110,11 +113,11 @@ function CreatePost() {
         onClose={() => setAuthModalOpen(false)}
         actionName="create posts"
       />
-      
+
       <div className="mobileHeaderOnly">
         <MobileHeader />
       </div>
-      
+
       <LeftNav />
 
       <main style={{
@@ -218,7 +221,7 @@ function CreatePost() {
                     ) : (
                       <img src={preview} alt="Preview" style={{ width: '100%', maxHeight: '480px', objectFit: 'contain' }} />
                     )}
-                    
+
                     {/* Discard Media Button */}
                     <button
                       type="button"
@@ -265,7 +268,7 @@ function CreatePost() {
                     <div style={{ fontSize: '0.92rem', fontWeight: 500, color: 'var(--text-2)', marginBottom: '10px', textAlign: 'center' }}>
                       Drag photos & videos from device
                     </div>
-                    
+
                     <span style={{
                       backgroundColor: '#0095f6',
                       color: '#ffffff',
@@ -289,7 +292,7 @@ function CreatePost() {
               </div>
 
               {/* Caption & Metadata Right Pane */}
-              <div 
+              <div
                 className="createPostCaptionPane"
                 style={{
                   flex: '1 1 320px',
@@ -342,10 +345,10 @@ function CreatePost() {
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid var(--border)', paddingBottom: '12px' }}>
                     <button type="button" style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center' }} title="Add emoji">
                       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0095f6" strokeWidth="2">
-                        <circle cx="12" cy="12" r="10"/>
-                        <path d="M8 14s1.5 2 4 2 4-2 4-2"/>
-                        <line x1="9" y1="9" x2="9.01" y2="9" strokeWidth="2.5"/>
-                        <line x1="15" y1="9" x2="15.01" y2="9" strokeWidth="2.5"/>
+                        <circle cx="12" cy="12" r="10" />
+                        <path d="M8 14s1.5 2 4 2 4-2 4-2" />
+                        <line x1="9" y1="9" x2="9.01" y2="9" strokeWidth="2.5" />
+                        <line x1="15" y1="9" x2="15.01" y2="9" strokeWidth="2.5" />
                       </svg>
                     </button>
                     <span style={{ fontSize: '0.78rem', color: 'var(--text-2)' }}>
@@ -373,8 +376,8 @@ function CreatePost() {
                     >
                       <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0095f6" strokeWidth="2">
-                          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 9 0 0118 0z"/>
-                          <circle cx="12" cy="10" r="3"/>
+                          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 9 0 0118 0z" />
+                          <circle cx="12" cy="10" r="3" />
                         </svg>
                         {location || "Add location"}
                       </span>

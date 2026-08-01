@@ -48,7 +48,9 @@ function Comment(props) {
     }
   };
 
-  const isOwner = props.currentUser?._id === props.author?._id;
+  const currentUserId = props.currentUser?._id ? props.currentUser._id.toString() : (props.currentUser ? props.currentUser.toString() : "");
+  const authorId = props.author?._id ? props.author._id.toString() : (props.author ? props.author.toString() : "");
+  const isOwner = currentUserId && authorId && currentUserId === authorId;
   const timeAgo = props.createdAt
     ? new Date(props.createdAt).toLocaleDateString([], { month: 'short', day: 'numeric' })
     : '';

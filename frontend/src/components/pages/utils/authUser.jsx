@@ -3,10 +3,9 @@ import { useEffect, useState } from "react";
 function useAuthUser() {
     const [currentUser, setCurrentUser] = useState(null);
    
-    useEffect(()=> {
-          async function getUser() {
-           try {
-              const response = await fetch("/users/me", {
+    const getUser = async () => {
+        try {
+            const response = await fetch("/users/me", {
                 method: "GET",
                 credentials: "include"
             });
@@ -14,12 +13,17 @@ function useAuthUser() {
             if(response.ok) {
                 setCurrentUser(data);
             }
-           }
-           catch(err) {
+        } catch(err) {
             console.log(err);
-           }
-          }
+        }
+    };
+
+    useEffect(() => {
         getUser();
+
+        const handleUpdate = () => getUser();
+        window.addEventListener("userUpdated", handleUpdate);
+        return () => window.removeEventListener("userUpdated", handleUpdate);
     }, []);
 
     return currentUser;

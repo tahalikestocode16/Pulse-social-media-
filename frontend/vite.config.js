@@ -6,15 +6,22 @@ export default defineConfig({
 
   server: {
     proxy: {
-      "/auth": "http://localhost:8080",
-      "/posts": "http://localhost:8080",
-      "/comments": "http://localhost:8080",
-      "/profile": "http://localhost:8080",
-      "/reports": "http://localhost:8080",
-      "/notifications": "http://localhost:8080",
-      "/conversation": "http://localhost:8080",
-      "/messages": "http://localhost:8080",
-      "/users": "http://localhost:8080",
+      "/auth": { target: "http://localhost:8080" },
+      "/posts": { target: "http://localhost:8080" },
+      "/comments": { target: "http://localhost:8080" },
+      "/profile": { 
+        target: "http://localhost:8080",
+        bypass: (req) => {
+          if (req.headers.accept && req.headers.accept.includes("html")) {
+            return "/index.html";
+          }
+        }
+      },
+      "/reports": { target: "http://localhost:8080" },
+      "/notifications": { target: "http://localhost:8080" },
+      "/conversation": { target: "http://localhost:8080" },
+      "/messages": { target: "http://localhost:8080" },
+      "/users": { target: "http://localhost:8080" },
     },
   },
 });

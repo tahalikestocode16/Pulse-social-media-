@@ -43,9 +43,16 @@ router.get("/following", isLogged, async (req, res) => {
 });
 
 // Create route
-router.post("/create", isLogged, postUpload.single("media"), async (req, res, next) => {
+router.post("/create", isLogged, (req, res, next) => {
+    postUpload.single("media")(req, res, (err) => {
+        if (err) {
+            console.log("Multer post upload error:", err);
+        }
+        next();
+    });
+}, async (req, res, next) => {
     try {
-        let { title } = req.body;
+        let { title, mediaData } = req.body;
         let author = req.user._id;
         
         let mediaUrl = "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&auto=format&fit=crop&q=80";
@@ -78,6 +85,9 @@ router.post("/create", isLogged, postUpload.single("media"), async (req, res, ne
                 // Fallback to base64 Data URI so creation NEVER fails
                 mediaUrl = `data:${req.file.mimetype};base64,${req.file.buffer.toString("base64")}`;
             }
+        } else if (mediaData && mediaData.startsWith("data:")) {
+            mediaUrl = mediaData;
+            mediaType = mediaData.includes("video") ? "video" : "image";
         }
 
         const newPost = await Post.create({

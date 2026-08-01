@@ -9,6 +9,11 @@ function Post(props) {
   const [commentText, setCommentText] = useState("");
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [shareModalOpen, setShareModalOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [reportModalOpen, setReportModalOpen] = useState(false);
+  const [reportReason, setReportReason] = useState("Spam or misleading");
+  const [reportSuccessMsg, setReportSuccessMsg] = useState("");
+  const [reportLoading, setReportLoading] = useState(false);
   const [modalAction, setModalAction] = useState("interact");
   const navigate = useNavigate();
 
@@ -100,6 +105,40 @@ function Post(props) {
     }
   };
 
+  const submitReport = async () => {
+    if (!props.currentUser) {
+      handleRequireAuth("report posts");
+      return;
+    }
+
+    setReportLoading(true);
+    try {
+      const response = await fetch("/reports", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          targetType: "Post",
+          targetId: props._id,
+          reason: reportReason,
+          description: `Reported post ${props._id} for ${reportReason}`
+        })
+      });
+
+      if (response.ok) {
+        setReportSuccessMsg("Thank you! Report submitted for review.");
+        setTimeout(() => {
+          setReportModalOpen(false);
+          setReportSuccessMsg("");
+        }, 1600);
+      }
+    } catch (err) {
+      console.log("Report submit error:", err);
+    } finally {
+      setReportLoading(false);
+    }
+  };
+
   const handleInlineCommentSubmit = async (e) => {
     e.preventDefault();
     if (!props.currentUser) {
@@ -161,17 +200,30 @@ function Post(props) {
           </div>
         </div>
 
-        {/* Post Options Menu */}
-        {isOwner && (
-          <div style={{ display: 'flex', gap: '8px' }}>
-            <button onClick={getEdit} className="editBtn" style={{ padding: '4px 10px', fontSize: '0.78rem' }}>
-              Edit
-            </button>
-            <button onClick={deletePost} className="deleteBtn" style={{ padding: '4px 10px', fontSize: '0.78rem' }}>
-              Delete
-            </button>
-          </div>
-        )}
+        {/* Three Dots (...) Options Button */}
+        <button
+          onClick={() => setMenuOpen(true)}
+          style={{
+            background: 'none',
+            border: 'none',
+            color: 'var(--text-1)',
+            fontSize: '1.2rem',
+            cursor: 'pointer',
+            padding: '6px 8px',
+            borderRadius: '50%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}
+          aria-label="Post options"
+          title="Options"
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <circle cx="12" cy="12" r="1.5" />
+            <circle cx="19" cy="12" r="1.5" />
+            <circle cx="5" cy="12" r="1.5" />
+          </svg>
+        </button>
       </div>
 
       {/* Media Block with Double Tap Like */}
@@ -322,6 +374,237 @@ function Post(props) {
           </button>
         </form>
       </div>
+
+      {/* Three Dots Action Sheet Modal */}
+      {menuOpen && (
+        <div 
+          onClick={() => setMenuOpen(false)}
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.7)',
+            zIndex: 10000,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '20px'
+          }}
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              backgroundColor: 'var(--bg-card)',
+              border: '1px solid var(--border)',
+              borderRadius: '16px',
+              width: '100%',
+              maxWidth: '380px',
+              overflow: 'hidden',
+              boxShadow: 'var(--shadow-md)',
+              display: 'flex',
+              flexDirection: 'column'
+            }}
+          >
+            <button
+              onClick={() => { setMenuOpen(false); setReportModalOpen(true); }}
+              style={{
+                padding: '16px',
+                border: 'none',
+                borderBottom: '1px solid var(--border)',
+                background: 'none',
+                color: 'var(--red)',
+                fontWeight: 700,
+                fontSize: '0.95rem',
+                cursor: 'pointer',
+                textAlign: 'center'
+              }}
+            >
+              Report Post
+            </button>
+
+            {isOwner && (
+              <>
+                <button
+                  onClick={() => { setMenuOpen(false); getEdit(); }}
+                  style={{
+                    padding: '16px',
+                    border: 'none',
+                    borderBottom: '1px solid var(--border)',
+                    background: 'none',
+                    color: 'var(--text-1)',
+                    fontWeight: 600,
+                    fontSize: '0.95rem',
+                    cursor: 'pointer',
+                    textAlign: 'center'
+                  }}
+                >
+                  Edit Post
+                </button>
+                <button
+                  onClick={() => { setMenuOpen(false); deletePost(); }}
+                  style={{
+                    padding: '16px',
+                    border: 'none',
+                    borderBottom: '1px solid var(--border)',
+                    background: 'none',
+                    color: 'var(--red)',
+                    fontWeight: 600,
+                    fontSize: '0.95rem',
+                    cursor: 'pointer',
+                    textAlign: 'center'
+                  }}
+                >
+                  Delete Post
+                </button>
+              </>
+            )}
+
+            <button
+              onClick={() => setMenuOpen(false)}
+              style={{
+                padding: '16px',
+                border: 'none',
+                background: 'none',
+                color: 'var(--text-2)',
+                fontSize: '0.95rem',
+                cursor: 'pointer',
+                textAlign: 'center'
+              }}
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Report Submission Modal */}
+      {reportModalOpen && (
+        <div 
+          onClick={() => setReportModalOpen(false)}
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.75)',
+            zIndex: 10001,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '20px'
+          }}
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              backgroundColor: 'var(--bg-card)',
+              border: '1px solid var(--border)',
+              borderRadius: '20px',
+              width: '100%',
+              maxWidth: '420px',
+              padding: '24px',
+              boxShadow: 'var(--shadow-md)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '16px'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 800, color: 'var(--text-1)' }}>Report Post</h3>
+              <button 
+                onClick={() => setReportModalOpen(false)}
+                style={{ background: 'none', border: 'none', color: 'var(--text-3)', fontSize: '1.2rem', cursor: 'pointer' }}
+              >
+                ✕
+              </button>
+            </div>
+
+            {reportSuccessMsg ? (
+              <div style={{ padding: '20px 0', textAlign: 'center', color: 'var(--green)', fontWeight: 700, fontSize: '0.95rem' }}>
+                {reportSuccessMsg}
+              </div>
+            ) : (
+              <>
+                <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--text-2)', lineHeight: 1.5 }}>
+                  Why are you reporting this post? Your report is anonymous and helps keep Pulse safe.
+                </p>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  {[
+                    "Spam or misleading",
+                    "Inappropriate or explicit media",
+                    "Harassment or hate speech",
+                    "Violence or dangerous content"
+                  ].map((reason) => (
+                    <label 
+                      key={reason}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '10px',
+                        padding: '12px 14px',
+                        borderRadius: '12px',
+                        backgroundColor: reportReason === reason ? 'rgba(147, 51, 234, 0.12)' : 'var(--bg-input)',
+                        border: '1px solid ' + (reportReason === reason ? 'var(--text-blue)' : 'var(--border)'),
+                        color: 'var(--text-1)',
+                        fontSize: '0.9rem',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      <input 
+                        type="radio" 
+                        name="reportReason" 
+                        value={reason} 
+                        checked={reportReason === reason} 
+                        onChange={(e) => setReportReason(e.target.value)} 
+                      />
+                      {reason}
+                    </label>
+                  ))}
+                </div>
+
+                <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
+                  <button
+                    onClick={() => setReportModalOpen(false)}
+                    style={{
+                      flex: 1,
+                      padding: '12px',
+                      backgroundColor: 'transparent',
+                      border: '1px solid var(--border)',
+                      color: 'var(--text-1)',
+                      borderRadius: '12px',
+                      fontWeight: 600,
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={submitReport}
+                    disabled={reportLoading}
+                    style={{
+                      flex: 1,
+                      padding: '12px',
+                      backgroundColor: 'var(--red)',
+                      border: 'none',
+                      color: '#ffffff',
+                      borderRadius: '12px',
+                      fontWeight: 700,
+                      cursor: reportLoading ? 'default' : 'pointer',
+                      opacity: reportLoading ? 0.6 : 1
+                    }}
+                  >
+                    {reportLoading ? "Submitting..." : "Submit Report"}
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </article>
   );
 }

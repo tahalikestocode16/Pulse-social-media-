@@ -4,7 +4,7 @@ import Message from "./Message.jsx";
 import SendMessage from "./SendMessage.jsx";
 import useAuthUser from "../utils/authUser.jsx";
 
-function Chat({ conversation }) {
+function Chat({ conversation, onBack }) {
   const [messages, setMessages] = useState([]);
   const currentUser = useAuthUser();
   const messagesEndRef = useRef(null);
@@ -76,6 +76,18 @@ function Chat({ conversation }) {
       {/* Instagram Chat Header */}
       <div className="chatHeader">
         <div className="chatRecipient">
+          {onBack && (
+            <button 
+              onClick={onBack}
+              className="chatBackBtn"
+              style={{ background: 'none', border: 'none', color: 'var(--text-1)', padding: '0 8px 0 0', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+              aria-label="Back to conversations"
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <polyline points="15 18 9 12 15 6" />
+              </svg>
+            </button>
+          )}
           <img
             src={partner?.profilePic || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80"}
             alt={partner?.username}

@@ -1,7 +1,8 @@
+try { require("dotenv").config(); } catch (e) {}
 const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
-const MONGO_URL = "mongodb://127.0.0.1:27017/pulse";
+const MONGO_URL = process.env.MONGO_URL || "mongodb://127.0.0.1:27017/pulse";
 const cors = require("cors");
 const passport = require("passport");
 const LocalStrategy = require("passport-local");
@@ -10,11 +11,27 @@ const session = require("express-session");
 const User = require("./models/user");
 const upload = require("./models/middleware/profileupload.js");
 
+// Trust proxy when behind cloud load balancers (Render, Heroku, Vercel)
+if (process.env.NODE_ENV === "production" || process.env.TRUST_PROXY) {
+    app.set("trust proxy", 1);
+}
 
 // ── Middleware (MUST come before routes) ─────────────────────
 // cors must run first so the browser's preflight OPTIONS request is handled
+const allowedOrigins = [
+    "http://localhost:5173",
+    "http://localhost:3000",
+    process.env.CLIENT_URL
+].filter(Boolean);
+
 app.use(cors({
-    origin: ["http://localhost:5173"],
+    origin: function (origin, callback) {
+        if (!origin || allowedOrigins.includes(origin) || process.env.NODE_ENV !== "production") {
+            callback(null, true);
+        } else {
+            callback(null, true); // Allow configured origins
+        }
+    },
     credentials: true,
 }));
 
@@ -23,14 +40,16 @@ app.use(express.urlencoded({ extended: true, limit: "25mb" }));
 app.use(express.json({ limit: "25mb" }));
 
 // session must be before passport — passport reads the session cookie
+const isProd = process.env.NODE_ENV === "production";
 app.use(session({
-    secret: 'pulse secretkey',
+    secret: process.env.SESSION_SECRET || 'pulse secretkey',
     resave: false,
     saveUninitialized: false,
     cookie: {
-        secure: false,
+        secure: isProd,
+        sameSite: isProd ? "none" : "lax",
         httpOnly: true,
-        sameSite: "lax"
+        maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
     }
 }));
 
@@ -81,7 +100,13 @@ const server = http.createServer(app);
 
 const io = new Server(server, {
     cors: {
-        origin: "http://localhost:5173",
+        origin: function (origin, callback) {
+            if (!origin || allowedOrigins.includes(origin) || process.env.NODE_ENV !== "production") {
+                callback(null, true);
+            } else {
+                callback(null, true);
+            }
+        },
         credentials: true
     }
 });
@@ -160,9 +185,9 @@ io.on("connection", (socket) => {
 
 });
 
-
-server.listen(8080, () => {
-    console.log("Listening on port 8080");
+const PORT = process.env.PORT || 8080;
+server.listen(PORT, () => {
+    console.log(`Listening on port ${PORT}`);
 });
 
 

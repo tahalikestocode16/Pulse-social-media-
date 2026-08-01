@@ -75,6 +75,7 @@ function EditProfile() {
       const data = await response.json();
 
       if (response.ok) {
+        window.dispatchEvent(new Event("userUpdated"));
         setMessage({ text: "Profile updated successfully! Redirecting...", type: "success" });
         setTimeout(() => {
           navigate("/profile");

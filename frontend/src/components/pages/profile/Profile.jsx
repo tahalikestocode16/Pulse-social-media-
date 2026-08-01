@@ -5,6 +5,7 @@ import LeftNav from "../LeftNav.jsx";
 import MobileHeader from "../MobileHeader.jsx";
 import MobileBottomNav from "../MobileBottomNav.jsx";
 import ReelsFeedModal from "../posts/ReelsFeedModal.jsx";
+import Error from "../Error.jsx";
 
 function Profile() {
   const { id } = useParams();
@@ -169,7 +170,11 @@ function Profile() {
         {loading ? (
           <div style={{ padding: "60px", textAlign: "center", color: 'var(--text-3)' }}>Loading profile...</div>
         ) : !profile ? (
-          <div style={{ padding: "60px", textAlign: "center", color: 'var(--text-3)' }}>Profile not found.</div>
+          <Error 
+            code="404"
+            title="Profile Not Found"
+            message="The user profile you are looking for doesn't exist, was removed, or may have changed their username."
+          />
         ) : (
           <>
             {/* Instagram Profile Header */}

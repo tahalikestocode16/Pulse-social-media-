@@ -105,6 +105,8 @@ const NAV = [
 
 const themeOptions = [
   { value: "pulse", label: "Pulse theme" },
+  { value: "beta", label: "Beta Light (Purple)" },
+  { value: "beta-dark", label: "Beta Dark (Purple)" },
   { value: "dark", label: "Dark mode" },
   { value: "light", label: "Light mode" },
 ];
@@ -119,7 +121,7 @@ function LeftNav() {
   const user = useAuthUser();
   const { pathname } = useLocation();
   const [theme, setTheme] = useState(() => {
-    return sessionStorage.getItem("pulse_theme") || "pulse";
+    return sessionStorage.setItem ? (sessionStorage.getItem("pulse_theme") || "beta-dark") : "beta-dark";
   });
   const [moreOpen, setMoreOpen] = useState(false);
 

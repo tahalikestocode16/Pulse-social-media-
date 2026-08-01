@@ -7,13 +7,13 @@ const postSchema = new Schema({
     type: String,
   },
   author: {
-     type: Schema.Types.ObjectId,
+    type: Schema.Types.ObjectId,
     ref: "User",
     required: true,
   },
   likes: [{
     type: Schema.Types.ObjectId,
-     ref: "User",
+    ref: "User",
   }],
   mediaUrl: {
     type: String,
@@ -28,9 +28,9 @@ const postSchema = new Schema({
   },
   publicId: {
     type: String
-},
-},  {
-    timestamps: true
+  },
+}, {
+  timestamps: true
 }
 );
 

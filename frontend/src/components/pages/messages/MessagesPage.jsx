@@ -47,7 +47,7 @@ function MessagesPage() {
       <MobileHeader />
       <LeftNav />
 
-      <main className="messagesPage">
+      <main className={`messagesPage${activeConvo ? " hasActiveConvoMobile" : ""}`}>
         {/* Conversations Sidebar */}
         <aside className="conversationsSidebar">
           <div className="conversationsHeader">
@@ -96,7 +96,7 @@ function MessagesPage() {
         {/* Active Chat Main Area */}
         <section className="chatMain">
           {activeConvo ? (
-            <Chat conversation={activeConvo} />
+            <Chat conversation={activeConvo} onBack={() => setActiveConvo(null)} />
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: '12px' }}>
               <div style={{ width: '80px', height: '80px', borderRadius: '50%', border: '2px solid var(--text-1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
