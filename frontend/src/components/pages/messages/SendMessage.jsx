@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-function SendMessage({ conversation, replyTo, onCancelReply }) {
+function SendMessage(props) {
   const [text, setText] = useState("");
 
   const onSubmit = async (e) => {
@@ -8,84 +8,102 @@ function SendMessage({ conversation, replyTo, onCancelReply }) {
     if (!text.trim()) return;
 
     try {
-      const response = await fetch(`/messages/${conversation._id}`, {
+      const response = await fetch(`/messages/${props.conversation._id}`, {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          text,
-          replyTo: replyTo?._id || null,
-        }),
+        body: JSON.stringify({ text }),
       });
       if (response.ok) {
         setText("");
-        onCancelReply?.();
       }
     } catch (err) {
       console.log(err);
     }
   };
 
-  const handleKeyDown = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      onSubmit(e);
-    }
-    if (e.key === 'Escape' && replyTo) {
-      onCancelReply?.();
-    }
-  };
-
-  const isReplyValid = replyTo && typeof replyTo === "object" && typeof replyTo.text === "string";
-
   return (
-    <div className="sendMessageWrapper">
-      {/* Reply preview strip */}
-      {isReplyValid && (
-        <div className="replyPreviewBar">
-          <div className="replyPreviewContent">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
-              <polyline points="9 17 4 12 9 7" />
-              <path d="M20 18v-2a4 4 0 0 0-4-4H4" />
-            </svg>
-            <div>
-              <span className="replyPreviewAuthor">Replying to {replyTo.sender?.username || "User"}</span>
-              <span className="replyPreviewText">{replyTo.text.slice(0, 60)}{replyTo.text.length > 60 ? '…' : ''}</span>
-            </div>
-          </div>
-          <button className="replyPreviewClose" onClick={onCancelReply} aria-label="Cancel reply">✕</button>
-        </div>
-      )}
+    <form
+      onSubmit={onSubmit}
+      className="sendMessageBar"
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '12px',
+        width: '100%',
+        maxWidth: '100%',
+        padding: '8px 16px',
+        backgroundColor: 'var(--bg-input, #132042)',
+        border: '1px solid var(--border, rgba(56, 189, 248, 0.2))',
+        borderRadius: '24px',
+        boxSizing: 'border-box',
+        marginTop: 'auto'
+      }}
+    >
+      {/* Emoji Button */}
+      <button
+        type="button"
+        style={{
+          background: 'none',
+          border: 'none',
+          color: 'var(--text-2, #94a3b8)',
+          cursor: 'pointer',
+          padding: '4px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          flexShrink: 0
+        }}
+        title="Choose emoji"
+      >
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+          <circle cx="12" cy="12" r="10" />
+          <path d="M8 14s1.5 2 4 2 4-2 4-2" />
+          <line x1="9" y1="9" x2="9.01" y2="9" />
+          <line x1="15" y1="9" x2="15.01" y2="9" />
+        </svg>
+      </button>
 
-      <form onSubmit={onSubmit} className="sendMessageBar">
-        {/* Emoji icon */}
-        <button type="button" className="sendMessageIconBtn" title="Emoji">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-            <circle cx="12" cy="12" r="10" />
-            <path d="M8 14s1.5 2 4 2 4-2 4-2" />
-            <line x1="9" y1="9" x2="9.01" y2="9" />
-            <line x1="15" y1="9" x2="15.01" y2="9" />
-          </svg>
+      {/* Full-width Wide Message Input */}
+      <input
+        type="text"
+        placeholder="Message..."
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+        className="sendMessageInput"
+        style={{
+          flex: 1,
+          width: '100%',
+          background: 'none',
+          border: 'none',
+          color: 'var(--text-1, #ffffff)',
+          fontSize: '0.92rem',
+          outline: 'none',
+          padding: '6px 0',
+          boxSizing: 'border-box'
+        }}
+      />
+
+      {/* Send Button */}
+      {text.trim() && (
+        <button
+          type="submit"
+          className="sendMessageBtn"
+          style={{
+            background: 'none',
+            border: 'none',
+            color: 'var(--text-blue, #38bdf8)',
+            fontWeight: 800,
+            fontSize: '0.9rem',
+            cursor: 'pointer',
+            padding: '4px 8px',
+            flexShrink: 0
+          }}
+        >
+          Send
         </button>
-
-        {/* Message input */}
-        <input
-          type="text"
-          placeholder={isReplyValid ? `Reply to ${replyTo.sender?.username || "User"}...` : "Message..."}
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          onKeyDown={handleKeyDown}
-          className="sendMessageInput"
-        />
-
-        {/* Send button */}
-        {text.trim() && (
-          <button type="submit" className="sendMessageBtn">
-            Send
-          </button>
-        )}
-      </form>
-    </div>
+      )}
+    </form>
   );
 }
 

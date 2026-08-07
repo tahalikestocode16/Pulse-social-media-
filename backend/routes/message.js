@@ -1,11 +1,10 @@
 const express = require("express");
-const mongoose = require("mongoose");
 const Conversation = require("../models/conversation.js");
 const Message = require("../models/message.js");
 const router = express.Router();
 const isLogged = require("../models/middleware/authenticate.js");
 
-// Send a new message (with optional replyTo)
+// Send a new message
 router.post("/:id", isLogged, async (req, res, next) => {
   try {
     let convo = await Conversation.findById(req.params.id).populate("participants");
@@ -26,23 +25,15 @@ router.post("/:id", isLogged, async (req, res, next) => {
       return res.status(403).json({ message: "Account unavailable" });
     }
 
-    const validReplyTo = (req.body.replyTo && mongoose.Types.ObjectId.isValid(req.body.replyTo))
-      ? req.body.replyTo
-      : null;
-
-    // Create message doc and populate sender + replyTo
+    // Create message doc and populate sender
     let message = await Message.create({
       sender: req.user._id,
       text: req.body.text,
       isRead: false,
-      conversation: req.params.id,
-      replyTo: validReplyTo
+      conversation: req.params.id
     });
 
     message = await message.populate("sender", "username profilePic");
-    if (message.replyTo) {
-      message = await message.populate({ path: "replyTo", populate: { path: "sender", select: "username" } });
-    }
 
     // Realtime socket emit
     const io = req.app.get("io");
@@ -69,10 +60,7 @@ router.get("/:id", isLogged, async (req, res, next) => {
     }
     let messages = await Message.find({
       conversation: convo._id
-    })
-      .populate("sender", "username profilePic")
-      .populate({ path: "replyTo", populate: { path: "sender", select: "username" } })
-      .sort({ createdAt: 1 });
+    }).populate("sender", "username profilePic").sort({ createdAt: 1 });
 
     return res.status(200).json(messages || []);
   } catch (err) {
@@ -105,7 +93,7 @@ router.delete("/:id", isLogged, async (req, res, next) => {
   }
 });
 
-// Edit message — sets isEdited: true
+// Edit message
 router.patch("/:id", isLogged, async (req, res, next) => {
   try {
     let text = req.body.text;
@@ -119,14 +107,11 @@ router.patch("/:id", isLogged, async (req, res, next) => {
       },
       {
         text: text,
-        isEdited: true,
       },
       {
         new: true,
       }
-    )
-      .populate("sender", "username profilePic")
-      .populate({ path: "replyTo", populate: { path: "sender", select: "username" } });
+    ).populate("sender", "username profilePic");
 
     if (!message) {
       return res.status(404).json({ message: "Message not found" });
