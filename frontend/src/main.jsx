@@ -4,10 +4,9 @@ import './styles.css'
 import App from './App.jsx'
 
 // ── Production API URL interceptor ──────────────────────────────
-// In dev, Vite proxies all /auth, /posts, etc. to localhost:8080.
-// In production on Vercel, we prepend VITE_API_URL (Railway backend URL)
-// so every relative fetch("/posts/...") automatically hits the right server.
-const API_BASE = import.meta.env.VITE_API_URL || '';
+// Prepend Railway backend URL to relative fetch calls in production/build
+const RAILWAY_BACKEND = "https://pulse-social-media-production.up.railway.app";
+const API_BASE = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? RAILWAY_BACKEND : '');
 
 if (API_BASE) {
   const _originalFetch = window.fetch.bind(window);

@@ -17,12 +17,13 @@ const upload = require("./models/middleware/profileupload.js");
 // cors must run first so the browser's preflight OPTIONS request is handled
 const allowedOrigins = [
     "http://localhost:5173",
+    "https://pulse-social-media-production.up.railway.app",
     process.env.FRONTEND_URL,
 ].filter(Boolean);
 
 app.use(cors({
     origin: function(origin, callback) {
-        if (!origin || allowedOrigins.includes(origin)) {
+        if (!origin || allowedOrigins.includes(origin) || (origin && origin.endsWith(".vercel.app"))) {
             callback(null, true);
         } else {
             callback(new Error("Not allowed by CORS"));
