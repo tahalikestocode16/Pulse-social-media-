@@ -104,11 +104,11 @@ const NAV = [
 ];
 
 const themeOptions = [
-  { value: "pulse", label: "Rose Blossom (Pink & White)" },
-  { value: "beta", label: "Beta Light (Purple)" },
-  { value: "beta-dark", label: "Beta Dark (Purple)" },
-  { value: "dark", label: "Dark mode" },
-  { value: "light", label: "Light mode" },
+  { value: "beta",      label: "Light Purple ✦ (Default)" },
+  { value: "beta-dark", label: "Deep Space Dark 🌌" },
+  { value: "pulse",     label: "Rose Blossom 🌸 (Pink)" },
+  { value: "dark",      label: "Pure Dark 🌑" },
+  { value: "light",     label: "Pure Light ☀️" },
 ];
 
 const mobileHiddenLabels = [
@@ -121,7 +121,7 @@ function LeftNav() {
   const user = useAuthUser();
   const { pathname } = useLocation();
   const [theme, setTheme] = useState(() => {
-    return sessionStorage.setItem ? (sessionStorage.getItem("pulse_theme") || "beta-dark") : "beta-dark";
+    return sessionStorage.setItem ? (sessionStorage.getItem("pulse_theme") || "beta") : "beta";
   });
   const [moreOpen, setMoreOpen] = useState(false);
 

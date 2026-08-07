@@ -128,169 +128,233 @@
   --theme-card-shadow: 0 16px 40px rgba(236, 72, 153, 0.14);
 }
 
-/* ── BETA LIGHT THEME (Purple Accent) ───────────────────────── */
+/* ── BETA LIGHT THEME (Premium Light Purple) ───────────────── */
 :root[data-theme="beta"] {
   color-scheme: light;
-  --bg-base: #f7f4fc;
-  --bg-surface: #ffffff;
+  --bg-base: #f5f0ff;
+  --bg-surface: #fdfbff;
   --bg-card: #ffffff;
-  --bg-input: #f3ebfc;
-  --bg-sidebar: #ffffff;
+  --bg-input: #ede8fb;
+  --bg-sidebar: #fdfbff;
 
-  --text-1: #0f172a;
-  --text-2: #334155;
-  --text-3: #64748b;
-  --text-blue: #9333ea;
+  --text-1: #130a2b;
+  --text-2: #3d2c6b;
+  --text-3: #7c6b9e;
+  --text-blue: #7c3aed;
 
-  --border: rgba(147, 51, 234, 0.16);
-  --border-focus: #a855f7;
+  --border: rgba(124, 58, 237, 0.14);
+  --border-focus: #7c3aed;
 
-  --shadow-sm: 0 4px 14px rgba(147, 51, 234, 0.08);
-  --shadow-md: 0 12px 36px rgba(147, 51, 234, 0.12);
+  --shadow-sm: 0 2px 12px rgba(124, 58, 237, 0.07);
+  --shadow-md: 0 8px 32px rgba(124, 58, 237, 0.11);
 
-  --grad-main: linear-gradient(135deg, #7c3aed 0%, #9333ea 50%, #d946ef 100%);
-  --grad-blue: linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%);
-  --grad-story: conic-gradient(#8b5cf6, #9333ea, #d946ef, #8b5cf6);
+  --grad-main: linear-gradient(135deg, #6d28d9 0%, #8b5cf6 45%, #c026d3 100%);
+  --grad-blue: linear-gradient(135deg, #7c3aed 0%, #a78bfa 100%);
+  --grad-story: conic-gradient(#7c3aed, #8b5cf6, #c026d3, #7c3aed);
 
-  --theme-border: rgba(147, 51, 234, 0.20);
-  --theme-card-shadow: 0 16px 40px rgba(147, 51, 234, 0.14);
+  --theme-border: rgba(124, 58, 237, 0.18);
+  --theme-card-shadow: 0 12px 40px rgba(124, 58, 237, 0.12);
+
+  --violet: #7c3aed;
+  --blue-deep: #6d28d9;
+  --blue-mid: #7c3aed;
+  --blue-light: #a78bfa;
+  --cyan: #c026d3;
+  --red: #dc2626;
+  --green: #16a34a;
+  --amber: #d97706;
 }
 
-/* ── BETA DARK THEME (Purple Accent) ────────────────────────── */
+/* ── BETA DARK THEME (Deep Space Purple — Polished) ─────────── */
 :root[data-theme="beta-dark"] {
   color-scheme: dark;
-  --bg-base: #090611;
-  --bg-surface: #0f0a1c;
-  --bg-card: #150f27;
-  --bg-input: #1f1738;
-  --bg-sidebar: #090611;
+  --bg-base: #04020b;
+  --bg-surface: #080514;
+  --bg-card: #0d0920;
+  --bg-input: #14102a;
+  --bg-sidebar: #04020b;
 
-  --text-1: #f8fafc;
-  --text-2: #cbd5e1;
-  --text-3: #94a3b8;
-  --text-blue: #c084fc;
+  --text-1: #f1eeff;
+  --text-2: #b8acd8;
+  --text-3: #7868a6;
+  --text-blue: #b197fc;
 
-  --border: rgba(168, 85, 247, 0.20);
-  --border-focus: #a855f7;
+  --border: rgba(139, 92, 246, 0.18);
+  --border-focus: #8b5cf6;
 
-  --shadow-sm: 0 4px 16px rgba(168, 85, 247, 0.12);
-  --shadow-md: 0 16px 48px rgba(0, 0, 0, 0.85);
+  --shadow-sm: 0 2px 12px rgba(109, 40, 217, 0.18);
+  --shadow-md: 0 12px 40px rgba(4, 2, 11, 0.95);
 
-  --grad-main: linear-gradient(135deg, #7c3aed 0%, #a855f7 50%, #e879f9 100%);
-  --grad-blue: linear-gradient(135deg, #9333ea 0%, #c084fc 100%);
-  --grad-story: conic-gradient(#9333ea, #a855f7, #e879f9, #9333ea);
+  --grad-main: linear-gradient(135deg, #4c1d95 0%, #7c3aed 40%, #a21caf 100%);
+  --grad-blue: linear-gradient(135deg, #6d28d9 0%, #8b5cf6 100%);
+  --grad-story: conic-gradient(#6d28d9, #7c3aed, #a21caf, #6d28d9);
 
-  --theme-border: rgba(168, 85, 247, 0.28);
-  --theme-card-shadow: 0 16px 48px rgba(9, 6, 17, 0.95);
+  --theme-border: rgba(139, 92, 246, 0.22);
+  --theme-card-shadow: 0 20px 60px rgba(4, 2, 11, 0.98);
+
+  --violet: #7c3aed;
+  --blue-deep: #4c1d95;
+  --blue-mid: #6d28d9;
+  --blue-light: #8b5cf6;
+  --cyan: #a21caf;
+  --red: #ef4444;
+  --green: #22c55e;
+  --amber: #f59e0b;
 }
 
-/* Beta Theme Component Overrides */
+/* ── Beta Shared Card Styles ───────────────────────────────── */
 :root[data-theme="beta"] .card,
-:root[data-theme="beta"] .postCard,
-:root[data-theme="beta-dark"] .card,
-:root[data-theme="beta-dark"] .postCard {
-  border-radius: 20px !important;
-  border: 1px solid rgba(168, 85, 247, 0.20) !important;
-  transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.25s ease, border-color 0.25s ease;
+:root[data-theme="beta"] .postCard {
+  border-radius: 18px !important;
+  border: 1px solid rgba(124, 58, 237, 0.12) !important;
+  background: #ffffff !important;
+  box-shadow: 0 2px 16px rgba(124, 58, 237, 0.06) !important;
+  transition: box-shadow 0.22s ease, border-color 0.22s ease !important;
 }
 
-:root[data-theme="beta"] .card,
-:root[data-theme="beta"] .postCard,
-:root[data-theme="beta-dark"] .card,
-:root[data-theme="beta-dark"] .postCard {
-  background: var(--bg-base) !important;
-  box-shadow: none !important;
-  border-bottom: 1px solid var(--border) !important;
-}
-
-.card:hover,
 :root[data-theme="beta"] .card:hover,
-:root[data-theme="beta-dark"] .card:hover {
-  transform: none !important;
-  box-shadow: none !important;
-  border-color: var(--border) !important;
+:root[data-theme="beta"] .postCard:hover {
+  box-shadow: 0 6px 28px rgba(124, 58, 237, 0.12) !important;
+  border-color: rgba(124, 58, 237, 0.22) !important;
 }
 
+:root[data-theme="beta-dark"] .card,
+:root[data-theme="beta-dark"] .postCard {
+  border-radius: 18px !important;
+  border: 1px solid rgba(139, 92, 246, 0.14) !important;
+  background: var(--bg-card) !important;
+  box-shadow: 0 4px 24px rgba(4, 2, 11, 0.7) !important;
+  transition: box-shadow 0.22s ease, border-color 0.22s ease !important;
+}
+
+:root[data-theme="beta-dark"] .card:hover,
+:root[data-theme="beta-dark"] .postCard:hover {
+  box-shadow: 0 8px 36px rgba(4, 2, 11, 0.9), 0 0 0 1px rgba(139, 92, 246, 0.20) !important;
+  border-color: rgba(139, 92, 246, 0.28) !important;
+}
+
+/* ── Beta LOGO badge ───────────────────────────────────────── */
 :root[data-theme="beta"] .leftNavLogo::after,
 :root[data-theme="beta"] .mobileHeaderLogo::after {
-  content: "BETA";
+  content: "LIGHT";
   display: inline-block;
   margin-left: 8px;
-  padding: 2px 7px;
-  font-size: 0.62rem;
+  padding: 2px 8px;
+  font-size: 0.6rem;
   font-weight: 800;
-  letter-spacing: 0.8px;
-  border-radius: 12px;
-  background: linear-gradient(135deg, #7c3aed 0%, #d946ef 100%);
+  letter-spacing: 1px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #6d28d9 0%, #c026d3 100%);
   color: #ffffff;
   vertical-align: middle;
-  box-shadow: 0 2px 8px rgba(147, 51, 234, 0.35);
+  box-shadow: 0 2px 10px rgba(109, 40, 217, 0.35);
 }
 
 :root[data-theme="beta-dark"] .leftNavLogo::after,
 :root[data-theme="beta-dark"] .mobileHeaderLogo::after {
-  content: "BETA DARK";
+  content: "DARK";
   display: inline-block;
   margin-left: 8px;
-  padding: 2px 7px;
-  font-size: 0.62rem;
+  padding: 2px 8px;
+  font-size: 0.6rem;
   font-weight: 800;
-  letter-spacing: 0.8px;
-  border-radius: 12px;
-  background: linear-gradient(135deg, #9333ea 0%, #e879f9 100%);
-  color: #ffffff;
+  letter-spacing: 1px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #4c1d95 0%, #7c3aed 100%);
+  color: #e0d4ff;
   vertical-align: middle;
-  box-shadow: 0 2px 10px rgba(168, 85, 247, 0.45);
+  box-shadow: 0 2px 12px rgba(76, 29, 149, 0.55);
 }
 
+/* ── Beta Nav Bars ─────────────────────────────────────────── */
 :root[data-theme="beta"] .leftNav {
-  background: rgba(255, 255, 255, 0.95) !important;
-  backdrop-filter: blur(20px) !important;
-  border-right: 1px solid rgba(147, 51, 234, 0.14) !important;
+  background: rgba(253, 251, 255, 0.97) !important;
+  backdrop-filter: blur(24px) !important;
+  border-right: 1px solid rgba(124, 58, 237, 0.12) !important;
+  box-shadow: 2px 0 20px rgba(124, 58, 237, 0.06) !important;
 }
 
 :root[data-theme="beta-dark"] .leftNav {
-  background: rgba(15, 10, 28, 0.95) !important;
-  backdrop-filter: blur(20px) !important;
-  border-right: 1px solid rgba(168, 85, 247, 0.20) !important;
+  background: rgba(4, 2, 11, 0.96) !important;
+  backdrop-filter: blur(28px) !important;
+  border-right: 1px solid rgba(139, 92, 246, 0.16) !important;
+  box-shadow: 2px 0 32px rgba(0, 0, 0, 0.9) !important;
 }
 
 :root[data-theme="beta"] .mobileHeader {
-  background: rgba(255, 255, 255, 0.95) !important;
-  backdrop-filter: blur(20px) !important;
-  border-bottom: 1px solid rgba(147, 51, 234, 0.14) !important;
+  background: rgba(253, 251, 255, 0.97) !important;
+  backdrop-filter: blur(24px) !important;
+  border-bottom: 1px solid rgba(124, 58, 237, 0.12) !important;
+  box-shadow: 0 2px 16px rgba(124, 58, 237, 0.07) !important;
 }
 
 :root[data-theme="beta-dark"] .mobileHeader {
-  background: rgba(15, 10, 28, 0.95) !important;
-  backdrop-filter: blur(20px) !important;
-  border-bottom: 1px solid rgba(168, 85, 247, 0.20) !important;
+  background: rgba(4, 2, 11, 0.97) !important;
+  backdrop-filter: blur(28px) !important;
+  border-bottom: 1px solid rgba(139, 92, 246, 0.16) !important;
+  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.85) !important;
 }
 
 :root[data-theme="beta"] .mobileBottomNav {
-  background: rgba(255, 255, 255, 0.96) !important;
-  backdrop-filter: blur(20px) !important;
-  border-top: 1px solid rgba(147, 51, 234, 0.16) !important;
-  box-shadow: 0 -4px 20px rgba(147, 51, 234, 0.10) !important;
+  background: rgba(253, 251, 255, 0.97) !important;
+  backdrop-filter: blur(24px) !important;
+  border-top: 1px solid rgba(124, 58, 237, 0.12) !important;
+  box-shadow: 0 -4px 24px rgba(124, 58, 237, 0.08) !important;
 }
 
 :root[data-theme="beta-dark"] .mobileBottomNav {
-  background: rgba(15, 10, 28, 0.96) !important;
-  backdrop-filter: blur(20px) !important;
-  border-top: 1px solid rgba(168, 85, 247, 0.22) !important;
-  box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.8) !important;
+  background: rgba(4, 2, 11, 0.97) !important;
+  backdrop-filter: blur(28px) !important;
+  border-top: 1px solid rgba(139, 92, 246, 0.16) !important;
+  box-shadow: 0 -4px 32px rgba(0, 0, 0, 0.95) !important;
 }
 
-:root[data-theme="beta"] .leftNavBtn.active {
-  background: rgba(147, 51, 234, 0.09) !important;
-  color: #9333ea !important;
+/* ── Beta Active Nav Button ────────────────────────────────── */
+:root[data-theme="beta"] .leftNavBtn.active,
+:root[data-theme="beta"] .leftNavBtn.active:hover {
+  background: linear-gradient(135deg, rgba(109, 40, 217, 0.10), rgba(192, 38, 211, 0.07)) !important;
+  color: #6d28d9 !important;
   border-radius: 14px !important;
+  box-shadow: inset 0 0 0 1px rgba(109, 40, 217, 0.14) !important;
 }
 
-:root[data-theme="beta-dark"] .leftNavBtn.active {
-  background: rgba(168, 85, 247, 0.15) !important;
-  color: #c084fc !important;
+:root[data-theme="beta-dark"] .leftNavBtn.active,
+:root[data-theme="beta-dark"] .leftNavBtn.active:hover {
+  background: linear-gradient(135deg, rgba(109, 40, 217, 0.22), rgba(139, 92, 246, 0.14)) !important;
+  color: #a78bfa !important;
   border-radius: 14px !important;
+  box-shadow: inset 0 0 0 1px rgba(139, 92, 246, 0.22), 0 0 12px rgba(109, 40, 217, 0.18) !important;
+}
+
+/* ── Beta Dark Input / Textarea glow ──────────────────────── */
+:root[data-theme="beta-dark"] input:focus,
+:root[data-theme="beta-dark"] textarea:focus,
+:root[data-theme="beta-dark"] select:focus {
+  box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.30), 0 0 16px rgba(109, 40, 217, 0.14) !important;
+  border-color: rgba(139, 92, 246, 0.50) !important;
+  outline: none !important;
+}
+
+/* ── Beta Light Input glow ─────────────────────────────────── */
+:root[data-theme="beta"] input:focus,
+:root[data-theme="beta"] textarea:focus,
+:root[data-theme="beta"] select:focus {
+  box-shadow: 0 0 0 2px rgba(109, 40, 217, 0.14) !important;
+  border-color: rgba(109, 40, 217, 0.40) !important;
+  outline: none !important;
+}
+
+/* ── Beta Dark — Scrollbar styling ───────────────────────── */
+:root[data-theme="beta-dark"] ::-webkit-scrollbar {
+  width: 5px;
+  background: transparent;
+}
+:root[data-theme="beta-dark"] ::-webkit-scrollbar-thumb {
+  background: rgba(139, 92, 246, 0.28);
+  border-radius: 99px;
+}
+:root[data-theme="beta-dark"] ::-webkit-scrollbar-thumb:hover {
+  background: rgba(139, 92, 246, 0.50);
 }
 
 /* ── Reset ─────────────────────────────────────────────────── */
