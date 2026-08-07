@@ -4482,34 +4482,54 @@ main,
   }
 }
 
-/* Create Post & Edit Post Responsive System */
+/* ══════════════════════════════════════════════════════════════
+   CREATE POST & EDIT POST — FULL RESPONSIVE SYSTEM
+   .page is a CSS grid: 245px | 1fr | 320px
+   .createPostMain must span cols 2-3 to fill the content area
+══════════════════════════════════════════════════════════════ */
+
 .createPostMain {
-  flex: 1;
+  /* Span the full content area (cols 2 + 3) in the page grid */
+  grid-column: 2 / -1;
   width: 100%;
-  max-width: 840px;
-  margin: 24px auto;
-  padding: 0 16px 100px 16px;
+  min-width: 0;
   box-sizing: border-box;
+
+  /* Center the inner card with a reasonable max-width */
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
   align-items: center;
+  justify-content: flex-start;
+
+  padding: 32px 24px 100px 24px;
+}
+
+/* The inner card wrapper — always fills available width */
+.createPostCard {
+  width: 100%;
+  max-width: 860px;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .createPostDualPane {
   display: flex;
   flex-direction: row;
   width: 100%;
-  min-height: 440px;
+  min-height: 460px;
   box-sizing: border-box;
   overflow: hidden;
 }
 
 .createPostMediaPane {
   flex: 1 1 58%;
-  width: 58%;
   min-width: 0;
-  min-height: 360px;
+  min-height: 380px;
   background-color: var(--bg-surface);
   border-right: 1px solid var(--border);
   display: flex;
@@ -4629,13 +4649,13 @@ main,
     border-right: none !important;
   }
 
-  /* Create Post tablet offset from 72px icon sidebar */
+  /* Create Post: tablet — flex:1, fill space after 72px icon nav */
   .createPostMain {
-    margin-left: auto !important;
-    margin-right: auto !important;
-    max-width: 760px !important;
-    padding-left: 16px !important;
-    padding-right: 16px !important;
+    flex: 1 !important;
+    grid-column: unset !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    padding: 24px 16px 84px 16px !important;
   }
 }
 
@@ -4705,14 +4725,19 @@ main,
     box-sizing: border-box !important;
   }
 
-  /* Create / Edit Post Mobile Layout */
+  /* Create / Edit Post — Mobile: single column stacked */
   .createPostMain {
-    margin: 0 !important;
-    padding: 8px 10px 84px 10px !important;
-    max-width: 100% !important;
+    grid-column: 1 / -1 !important;
+    padding: 0 10px 84px 10px !important;
     width: 100% !important;
     min-width: 0 !important;
     box-sizing: border-box !important;
+    align-items: stretch !important;
+  }
+
+  .createPostCard {
+    border-radius: 12px !important;
+    max-width: 100% !important;
   }
 
   .createPostDualPane {
@@ -4725,7 +4750,7 @@ main,
     flex: none !important;
     width: 100% !important;
     min-height: 220px !important;
-    max-height: 320px !important;
+    max-height: 300px !important;
     border-right: none !important;
     border-bottom: 1px solid var(--border) !important;
   }
