@@ -81,13 +81,7 @@ function EditPost() {
 
       <LeftNav />
 
-      <main style={{
-        maxWidth: '840px',
-        width: '100%',
-        margin: '24px auto',
-        padding: '0 16px 100px 16px',
-        boxSizing: 'border-box'
-      }}>
+      <main className="createPostMain">
         {/* Instagram Styled Edit Post Container */}
         <div style={{
           backgroundColor: 'var(--bg-card)',
@@ -152,23 +146,9 @@ function EditPost() {
             <div style={{ padding: '60px', textAlign: 'center', color: 'var(--text-2)' }}>Loading post details...</div>
           ) : (
             <form onSubmit={onSubmit} style={{ margin: 0 }}>
-              <div style={{
-                display: 'flex',
-                flexDirection: 'row',
-                flexWrap: 'wrap',
-                minHeight: '360px'
-              }}>
+              <div className="createPostDualPane">
                 {/* Media Display Pane */}
-                <div style={{
-                  flex: '1 1 360px',
-                  minHeight: '300px',
-                  backgroundColor: 'var(--bg-surface)',
-                  borderRight: '1px solid var(--border)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  overflow: 'hidden'
-                }}>
+                <div className="createPostMediaPane">
                   {post?.mediaType === "video" ? (
                     <video src={post.mediaUrl} controls style={{ width: '100%', maxHeight: '420px', objectFit: 'contain' }} />
                   ) : (
@@ -177,14 +157,7 @@ function EditPost() {
                 </div>
 
                 {/* Caption Right Pane */}
-                <div style={{
-                  flex: '1 1 320px',
-                  padding: '20px',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  justifyContent: 'space-between',
-                  backgroundColor: 'var(--bg-card)'
-                }}>
+                <div className="createPostCaptionPane">
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                       <img

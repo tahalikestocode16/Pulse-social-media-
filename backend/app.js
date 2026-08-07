@@ -1,8 +1,9 @@
-try { require("dotenv").config(); } catch (e) {}
+try { require("dotenv").config(); } catch (e) { }
 const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
 const MONGO_URL = process.env.MONGO_URL || "mongodb://127.0.0.1:27017/pulse";
+const PORT = process.env.PORT || 8080;
 const cors = require("cors");
 const passport = require("passport");
 const LocalStrategy = require("passport-local");
@@ -11,25 +12,20 @@ const session = require("express-session");
 const User = require("./models/user");
 const upload = require("./models/middleware/profileupload.js");
 
-// Trust proxy when behind cloud load balancers (Render, Heroku, Vercel)
-if (process.env.NODE_ENV === "production" || process.env.TRUST_PROXY) {
-    app.set("trust proxy", 1);
-}
 
 // ── Middleware (MUST come before routes) ─────────────────────
 // cors must run first so the browser's preflight OPTIONS request is handled
 const allowedOrigins = [
     "http://localhost:5173",
-    "http://localhost:3000",
-    process.env.CLIENT_URL
+    process.env.FRONTEND_URL,
 ].filter(Boolean);
 
 app.use(cors({
-    origin: function (origin, callback) {
-        if (!origin || allowedOrigins.includes(origin) || process.env.NODE_ENV !== "production") {
+    origin: function(origin, callback) {
+        if (!origin || allowedOrigins.includes(origin)) {
             callback(null, true);
         } else {
-            callback(null, true); // Allow configured origins
+            callback(new Error("Not allowed by CORS"));
         }
     },
     credentials: true,
@@ -40,15 +36,15 @@ app.use(express.urlencoded({ extended: true, limit: "25mb" }));
 app.use(express.json({ limit: "25mb" }));
 
 // session must be before passport — passport reads the session cookie
-const isProd = process.env.NODE_ENV === "production";
+const isProduction = process.env.NODE_ENV === "production";
 app.use(session({
     secret: process.env.SESSION_SECRET || 'pulse secretkey',
     resave: false,
     saveUninitialized: false,
     cookie: {
-        secure: isProd,
-        sameSite: isProd ? "none" : "lax",
+        secure: isProduction,
         httpOnly: true,
+        sameSite: isProduction ? "none" : "lax",
         maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
     }
 }));
@@ -100,13 +96,7 @@ const server = http.createServer(app);
 
 const io = new Server(server, {
     cors: {
-        origin: function (origin, callback) {
-            if (!origin || allowedOrigins.includes(origin) || process.env.NODE_ENV !== "production") {
-                callback(null, true);
-            } else {
-                callback(null, true);
-            }
-        },
+        origin: allowedOrigins,
         credentials: true
     }
 });
@@ -131,7 +121,7 @@ io.on("connection", (socket) => {
     const userId = socket.handshake.auth.userId;
 
 
-    if(userId) {
+    if (userId) {
         userSocketMap.set(userId, socket.id);
     }
 
@@ -151,22 +141,22 @@ io.on("connection", (socket) => {
         );
 
     });
-//    to means to everyone else in the room except yourself
+    //    to means to everyone else in the room except yourself
     socket.on("typing", ({ conversationId, userId }) => {
 
-    socket.to(conversationId).emit("userTyping", {
-        userId
-    });
+        socket.to(conversationId).emit("userTyping", {
+            userId
+        });
 
-});
+    });
 
 
     // disconnect cleanup
     socket.on("disconnect", () => {
 
-        for(let [userId, socketId] of userSocketMap) {
+        for (let [userId, socketId] of userSocketMap) {
 
-            if(socketId === socket.id) {
+            if (socketId === socket.id) {
 
                 userSocketMap.delete(userId);
                 break;
@@ -185,7 +175,7 @@ io.on("connection", (socket) => {
 
 });
 
-const PORT = process.env.PORT || 8080;
+
 server.listen(PORT, () => {
     console.log(`Listening on port ${PORT}`);
 });

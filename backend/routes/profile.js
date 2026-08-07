@@ -84,7 +84,7 @@ router.patch("/edit", isLogged, isProfileOwner, (req, res, next) => {
                 updates.profilePic = fileUrl;
             } else if (req.file.buffer) {
                 let uploadedUrl = null;
-                if (process.env.CLOUD_NAME && process.env.API_KEY) {
+                if (process.env.CLOUD_NAME && process.env.CLOUD_API_KEY) {
                     try {
                         const { cloudinary } = require("../config/cloudinary");
                         const result = await new Promise((resolve, reject) => {
@@ -113,7 +113,7 @@ router.patch("/edit", isLogged, isProfileOwner, (req, res, next) => {
         if (!updates.profilePic && picInput && typeof picInput === "string") {
             if (picInput.startsWith("data:")) {
                 let uploadedUrl = null;
-                if (process.env.CLOUD_NAME && process.env.API_KEY) {
+                if (process.env.CLOUD_NAME && process.env.CLOUD_API_KEY) {
                     try {
                         const { cloudinary } = require("../config/cloudinary");
                         const uploadResult = await cloudinary.uploader.upload(picInput, {
@@ -145,7 +145,10 @@ router.patch("/edit", isLogged, isProfileOwner, (req, res, next) => {
             if (loginErr) {
                 console.log("Passport session refresh error:", loginErr);
             }
-            return res.status(200).json(updatedUser);
+            req.session.save((saveErr) => {
+                if (saveErr) console.log("Session save error:", saveErr);
+                return res.status(200).json(updatedUser);
+            });
         });
     } catch (err) {
         console.log("Profile edit error:", err);

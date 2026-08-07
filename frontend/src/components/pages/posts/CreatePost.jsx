@@ -12,6 +12,8 @@ function CreatePost() {
   const [preview, setPreview] = useState(null);
   const [location, setLocation] = useState("");
   const [showLocationInput, setShowLocationInput] = useState(false);
+  const [altText, setAltText] = useState("");
+  const [showAltTextInput, setShowAltTextInput] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [authModalOpen, setAuthModalOpen] = useState(false);
@@ -76,6 +78,9 @@ function CreatePost() {
     try {
       const formData = new FormData();
       formData.append("title", title || "Pulse Post");
+      if (location) formData.append("location", location);
+      if (altText) formData.append("altText", altText);
+
       if (media) {
         formData.append("media", media);
       }
@@ -120,24 +125,20 @@ function CreatePost() {
 
       <LeftNav />
 
-      <main style={{
-        maxWidth: '840px',
-        width: '100%',
-        margin: '24px auto',
-        padding: '0 16px 100px 16px',
-        boxSizing: 'border-box'
-      }}>
-        {/* Instagram Styled Create Post Container */}
+      {/* Main Content Workspace — Centered Modal Layout */}
+      <main className="createPostMain">
+        {/* Instagram Styled Create Post Centered Card Container */}
         <div style={{
+          width: '100%',
           backgroundColor: 'var(--bg-card)',
           border: '1px solid var(--border)',
-          borderRadius: '16px',
+          borderRadius: '18px',
           boxShadow: 'var(--shadow-md)',
           overflow: 'hidden',
           display: 'flex',
           flexDirection: 'column'
         }}>
-          {/* Header Bar */}
+          {/* Top Modal Header Bar */}
           <div style={{
             height: '52px',
             borderBottom: '1px solid var(--border)',
@@ -148,6 +149,7 @@ function CreatePost() {
             backgroundColor: 'var(--bg-card)'
           }}>
             <button
+              type="button"
               onClick={() => navigate('/')}
               style={{
                 background: 'none',
@@ -190,10 +192,10 @@ function CreatePost() {
             </button>
           </div>
 
-          {/* Dual-Pane Content Body */}
+          {/* Dual-Pane Content Body Form */}
           <form onSubmit={onSubmit} encType="multipart/form-data" style={{ margin: 0 }}>
             <div className="createPostDualPane">
-              {/* Media Upload / Preview Pane */}
+              {/* Media Upload / Preview Left Pane */}
               <div
                 className="createPostMediaPane"
                 onDragEnter={handleDrag}
@@ -201,16 +203,7 @@ function CreatePost() {
                 onDragOver={handleDrag}
                 onDrop={handleDrop}
                 style={{
-                  flex: '1 1 420px',
-                  minHeight: '340px',
                   backgroundColor: dragActive ? 'var(--bg-input)' : 'var(--bg-surface)',
-                  borderRight: '1px solid var(--border)',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  position: 'relative',
-                  overflow: 'hidden',
                   transition: 'background-color 0.2s ease'
                 }}
               >
@@ -252,31 +245,32 @@ function CreatePost() {
                     flexDirection: 'column',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    padding: '24px 16px',
+                    padding: '32px 20px',
                     cursor: 'pointer',
                     width: '100%',
                     height: '100%',
                     boxSizing: 'border-box'
                   }}>
                     {/* Compact Instagram Media Icon */}
-                    <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#0095f6" strokeWidth="1.5" style={{ marginBottom: '10px' }}>
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#0095f6" strokeWidth="1.5" style={{ marginBottom: '12px' }}>
                       <rect x="2" y="3" width="20" height="18" rx="4" />
                       <circle cx="8.5" cy="8.5" r="1.8" />
                       <path d="M21 15l-5-5L5 21" strokeWidth="1.5" />
                     </svg>
 
-                    <div style={{ fontSize: '0.92rem', fontWeight: 500, color: 'var(--text-2)', marginBottom: '10px', textAlign: 'center' }}>
+                    <div style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--text-1)', marginBottom: '12px', textAlign: 'center' }}>
                       Drag photos & videos from device
                     </div>
 
                     <span style={{
                       backgroundColor: '#0095f6',
                       color: '#ffffff',
-                      padding: '6px 14px',
+                      padding: '8px 18px',
                       borderRadius: '8px',
-                      fontSize: '0.82rem',
-                      fontWeight: 600,
-                      display: 'inline-block'
+                      fontSize: '0.85rem',
+                      fontWeight: 700,
+                      display: 'inline-block',
+                      boxShadow: '0 4px 14px rgba(0, 149, 246, 0.3)'
                     }}>
                       Select from device
                     </span>
@@ -292,17 +286,7 @@ function CreatePost() {
               </div>
 
               {/* Caption & Metadata Right Pane */}
-              <div
-                className="createPostCaptionPane"
-                style={{
-                  flex: '1 1 320px',
-                  padding: '20px',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  justifyContent: 'space-between',
-                  backgroundColor: 'var(--bg-card)'
-                }}
-              >
+              <div className="createPostCaptionPane">
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                   {/* User Profile Header */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -326,14 +310,14 @@ function CreatePost() {
                     placeholder="Write a caption..."
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
-                    rows={6}
-                    maxLength={2200}
+                    rows={5}
+                    maxLength={450}
                     style={{
                       width: '100%',
                       backgroundColor: 'transparent',
                       border: 'none',
                       color: 'var(--text-1)',
-                      fontSize: '1rem',
+                      fontSize: '0.98rem',
                       outline: 'none',
                       resize: 'none',
                       fontFamily: 'inherit',
@@ -341,7 +325,7 @@ function CreatePost() {
                     }}
                   />
 
-                  {/* Character Counter & Emoji bar */}
+                  {/* Character Counter & Limit bar */}
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid var(--border)', paddingBottom: '12px' }}>
                     <button type="button" style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center' }} title="Add emoji">
                       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0095f6" strokeWidth="2">
@@ -351,12 +335,12 @@ function CreatePost() {
                         <line x1="15" y1="9" x2="15.01" y2="9" strokeWidth="2.5" />
                       </svg>
                     </button>
-                    <span style={{ fontSize: '0.78rem', color: 'var(--text-2)' }}>
-                      {title.length}/2,200
+                    <span style={{ fontSize: '0.78rem', color: 'var(--text-3)', fontWeight: 600 }}>
+                      {title.length}/450
                     </span>
                   </div>
 
-                  {/* Location Picker Row */}
+                  {/* Location Picker Field */}
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                     <button
                       type="button"
@@ -368,7 +352,7 @@ function CreatePost() {
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'space-between',
-                        padding: '8px 0',
+                        padding: '6px 0',
                         cursor: 'pointer',
                         fontSize: '0.92rem',
                         fontWeight: 500
@@ -405,10 +389,60 @@ function CreatePost() {
                       />
                     )}
                   </div>
+
+                  {/* Accessibility Alt Text Field */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <button
+                      type="button"
+                      onClick={() => setShowAltTextInput(!showAltTextInput)}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        color: 'var(--text-1)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        padding: '6px 0',
+                        cursor: 'pointer',
+                        fontSize: '0.92rem',
+                        fontWeight: 500
+                      }}
+                    >
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#a855f7" strokeWidth="2">
+                          <rect x="3" y="3" width="18" height="18" rx="2" />
+                          <path d="M7 15h10M7 11h10M7 7h6" />
+                        </svg>
+                        {altText ? `Alt Text: ${altText.slice(0, 18)}...` : "Accessibility / Alt Text"}
+                      </span>
+                      <span style={{ color: 'var(--text-2)' }}>{showAltTextInput ? "▲" : "▼"}</span>
+                    </button>
+
+                    {showAltTextInput && (
+                      <input
+                        type="text"
+                        placeholder="Write accessibility alt text for photo..."
+                        value={altText}
+                        onChange={(e) => setAltText(e.target.value)}
+                        style={{
+                          width: '100%',
+                          height: '38px',
+                          padding: '8px 12px',
+                          fontSize: '0.88rem',
+                          borderRadius: '8px',
+                          border: '1px solid var(--border)',
+                          backgroundColor: 'var(--bg-input)',
+                          color: 'var(--text-1)',
+                          outline: 'none',
+                          boxSizing: 'border-box'
+                        }}
+                      />
+                    )}
+                  </div>
                 </div>
 
-                {/* Error Banner & Mobile Bottom Share Button */}
-                <div>
+                {/* Error Banner & Primary Share Button */}
+                <div style={{ marginTop: '16px' }}>
                   {error && (
                     <div style={{ color: 'var(--red)', fontSize: '0.85rem', marginBottom: '12px', textAlign: 'center' }}>
                       {error}
@@ -425,15 +459,15 @@ function CreatePost() {
                       color: '#ffffff',
                       border: 'none',
                       borderRadius: '10px',
-                      fontSize: '1rem',
+                      fontSize: '0.98rem',
                       fontWeight: 700,
                       cursor: isFormValid ? 'pointer' : 'default',
                       opacity: isFormValid ? 1 : 0.5,
-                      marginTop: '12px',
+                      boxShadow: isFormValid ? '0 4px 14px rgba(0, 149, 246, 0.4)' : 'none',
                       transition: 'opacity 0.2s ease, backgroundColor 0.2s ease'
                     }}
                   >
-                    {loading ? "Posting..." : "Share Post"}
+                    {loading ? "Sharing..." : "Share Post"}
                   </button>
                 </div>
               </div>

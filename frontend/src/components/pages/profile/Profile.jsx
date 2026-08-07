@@ -62,6 +62,10 @@ function Profile() {
 
   useEffect(() => {
     fetchProfile();
+
+    const handleUserUpdate = () => fetchProfile();
+    window.addEventListener("userUpdated", handleUserUpdate);
+    return () => window.removeEventListener("userUpdated", handleUserUpdate);
   }, [id]);
 
   useEffect(() => {

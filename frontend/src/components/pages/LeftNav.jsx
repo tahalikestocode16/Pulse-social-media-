@@ -104,7 +104,7 @@ const NAV = [
 ];
 
 const themeOptions = [
-  { value: "pulse", label: "Pulse theme" },
+  { value: "pulse", label: "Rose Blossom (Pink & White)" },
   { value: "beta", label: "Beta Light (Purple)" },
   { value: "beta-dark", label: "Beta Dark (Purple)" },
   { value: "dark", label: "Dark mode" },
@@ -145,6 +145,7 @@ function LeftNav() {
       {/* Logo */}
       <Link to="/" className="leftNavLogo" aria-label="Pulse home">
         <IcoPulse />
+        <span className="leftNavLogoText">Pulse</span>
       </Link>
 
       {/* Main nav links */}

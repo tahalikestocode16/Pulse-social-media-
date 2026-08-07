@@ -107,24 +107,25 @@
 }
 
 :root[data-theme="pulse"] {
-  --bg-base: #030712;
-  --bg-surface: #070e20;
-  --bg-card: #0c152e;
-  --bg-input: #132042;
-  --bg-sidebar: #02050e;
-  --text-1: #f8fafc;
-  --text-2: #94a3b8;
-  --text-3: #64748b;
-  --text-blue: #38bdf8;
-  --border: rgba(56, 189, 248, 0.16);
-  --border-focus: #0095f6;
-  --shadow-sm: 0 4px 16px rgba(0, 149, 246, 0.12);
-  --shadow-md: 0 16px 48px rgba(0, 0, 0, 0.85);
-  --grad-main: linear-gradient(135deg, #0095f6 0%, #6366f1 50%, #00d2ff 100%);
-  --grad-blue: linear-gradient(135deg, #0095f6 0%, #38bdf8 100%);
-  --grad-story: conic-gradient(#0095f6, #6366f1, #00d2ff, #38bdf8, #0095f6);
-  --theme-border: rgba(56, 189, 248, 0.24);
-  --theme-card-shadow: 0 16px 48px rgba(2, 6, 18, 0.9);
+  color-scheme: light;
+  --bg-base: #fdf2f5;
+  --bg-surface: #ffffff;
+  --bg-card: #ffffff;
+  --bg-input: #fce7f3;
+  --bg-sidebar: #ffffff;
+  --text-1: #2d061c;
+  --text-2: #644156;
+  --text-3: #9d738c;
+  --text-blue: #db2777;
+  --border: rgba(236, 72, 153, 0.18);
+  --border-focus: #ec4899;
+  --shadow-sm: 0 4px 14px rgba(236, 72, 153, 0.08);
+  --shadow-md: 0 12px 36px rgba(236, 72, 153, 0.12);
+  --grad-main: linear-gradient(135deg, #ec4899 0%, #f43f5e 50%, #fb923c 100%);
+  --grad-blue: linear-gradient(135deg, #ec4899 0%, #f472b6 100%);
+  --grad-story: conic-gradient(#ec4899, #f43f5e, #fb923c, #f472b6, #ec4899);
+  --theme-border: rgba(236, 72, 153, 0.22);
+  --theme-card-shadow: 0 16px 40px rgba(236, 72, 153, 0.14);
 }
 
 /* ── BETA LIGHT THEME (Purple Accent) ───────────────────────── */
@@ -3960,6 +3961,17 @@ form a {
   text-decoration: none;
 }
 
+.leftNavLogoText {
+  font-size: 1.45rem;
+  font-weight: 800;
+  color: var(--text-1);
+  letter-spacing: -0.03em;
+  background: var(--grad-main);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: inline-block;
+}
+
 .leftNavItems {
   display: flex;
   flex-direction: column;
@@ -4343,32 +4355,55 @@ main,
   }
 }
 
-/* Create Post Dual-Pane Responsive Styles */
+/* Create Post & Edit Post Responsive System */
+.createPostMain {
+  flex: 1;
+  width: 100%;
+  max-width: 840px;
+  margin: 24px auto;
+  padding: 0 16px 100px 16px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+}
+
 .createPostDualPane {
   display: flex;
   flex-direction: row;
-  flex-wrap: wrap;
-  min-height: 420px;
+  width: 100%;
+  min-height: 440px;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
-@media (max-width: 640px) {
-  .createPostDualPane {
-    flex-direction: column !important;
-    min-height: auto !important;
-  }
+.createPostMediaPane {
+  flex: 1 1 58%;
+  width: 58%;
+  min-width: 0;
+  min-height: 360px;
+  background-color: var(--bg-surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  box-sizing: border-box;
+}
 
-  .createPostMediaPane {
-    flex: 1 1 100% !important;
-    min-height: 220px !important;
-    max-height: 320px !important;
-    border-right: none !important;
-    border-bottom: 1px solid var(--border) !important;
-  }
-
-  .createPostCaptionPane {
-    flex: 1 1 100% !important;
-    padding: 14px !important;
-  }
+.createPostCaptionPane {
+  flex: 0 0 42%;
+  width: 42%;
+  min-width: 0;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background-color: var(--bg-card);
+  box-sizing: border-box;
 }
 
 /* Mobile Header Base Styles */
@@ -4398,8 +4433,8 @@ main,
   }
 }
 
-/* 2. Compact Icon Sidebar Range (551px to 1024px) */
-@media (max-width: 1024px) and (min-width: 551px) {
+/* 2. Compact Icon Sidebar Range (769px to 1024px) */
+@media (max-width: 1024px) and (min-width: 769px) {
 
   /* Compact 72px Icon-Only Sidebar */
   .leftNav {
@@ -4410,7 +4445,7 @@ main,
 
   .leftNavLabel,
   .leftNavProfileInfo,
-  .leftNavLogo {
+  .leftNavLogoText {
     display: none !important;
   }
 
@@ -4457,20 +4492,28 @@ main,
   }
 
   .feedCol,
-  main,
   .feed,
   .feedLayout {
     margin-left: 0 !important;
     width: 100% !important;
-    max-width: 470px !important;
+    max-width: 630px !important;
     flex: 1 !important;
     border-left: none !important;
     border-right: none !important;
   }
+
+  /* Create Post tablet offset from 72px icon sidebar */
+  .createPostMain {
+    margin-left: auto !important;
+    margin-right: auto !important;
+    max-width: 760px !important;
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
 }
 
-/* 3. Fullscreen Posts Mobile Range (<= 550px) */
-@media (max-width: 550px) {
+/* 3. Fullscreen Posts Mobile Range (<= 768px) */
+@media (max-width: 768px) {
 
   /* Remove Sidebar completely */
   .leftNav {
@@ -4535,6 +4578,37 @@ main,
     box-sizing: border-box !important;
   }
 
+  /* Create / Edit Post Mobile Layout */
+  .createPostMain {
+    margin: 0 !important;
+    padding: 8px 10px 84px 10px !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  .createPostDualPane {
+    flex-direction: column !important;
+    min-height: auto !important;
+    width: 100% !important;
+  }
+
+  .createPostMediaPane {
+    flex: none !important;
+    width: 100% !important;
+    min-height: 220px !important;
+    max-height: 320px !important;
+    border-right: none !important;
+    border-bottom: 1px solid var(--border) !important;
+  }
+
+  .createPostCaptionPane {
+    flex: none !important;
+    width: 100% !important;
+    padding: 14px !important;
+  }
+
   /* Shift to 100% FULLSCREEN POSTS */
   .page {
     display: block !important;
@@ -4554,7 +4628,7 @@ main,
     padding: 0 !important;
   }
 
-  main,
+  main:not(.createPostMain),
   .messagesPage,
   .feed,
   .feedLayout {

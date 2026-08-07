@@ -75,6 +75,10 @@ const router = createBrowserRouter([
         element: <CreatePost />
       },
       {
+        path: "/create",
+        element: <CreatePost />
+      },
+      {
         path: "/posts/:id/comment",
         element: <CommentSection />
       },
