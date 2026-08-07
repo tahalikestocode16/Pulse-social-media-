@@ -83,7 +83,15 @@ function EditPost() {
 
       <main className="createPostMain">
         {/* Instagram Styled Edit Post Container */}
-        <div className="createPostCard">
+        <div style={{
+          backgroundColor: 'var(--bg-card)',
+          border: '1px solid var(--border)',
+          borderRadius: '16px',
+          boxShadow: 'var(--shadow-md)',
+          overflow: 'hidden',
+          display: 'flex',
+          flexDirection: 'column'
+        }}>
           {/* Header Bar */}
           <div style={{
             height: '52px',

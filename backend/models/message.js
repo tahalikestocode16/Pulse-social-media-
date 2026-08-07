@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 const messageSchema = new Schema({
-   
+
     sender: {
         type: Schema.Types.ObjectId,
         ref: "User",
@@ -11,18 +11,18 @@ const messageSchema = new Schema({
         type: Boolean,
         default: false
     },
-  
+
     readBy: [
-    {
-        user: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "User"
-        },
-        readAt: {
-            type: Date
+        {
+            user: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: "User"
+            },
+            readAt: {
+                type: Date
+            }
         }
-    }
-],
+    ],
     text: {
         type: String,
         required: true,

@@ -24,7 +24,7 @@ function Search() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [activeCategory, setActiveCategory] = useState("For You");
-  
+
   const [posts, setPosts] = useState(DUMMY_EXPLORE);
   const [selectedPostIndex, setSelectedPostIndex] = useState(null);
 
@@ -78,7 +78,7 @@ function Search() {
           credentials: "include"
         });
         const data = await response.json();
-        
+
         if (response.ok && data) {
           setSearchResults(Array.isArray(data) ? data : [data]);
         } else {
@@ -121,7 +121,7 @@ function Search() {
         // Update local search results state
         setSearchResults(prev => prev.map(u => {
           if (u._id === targetUser._id) {
-            const newFollowers = isFollowing 
+            const newFollowers = isFollowing
               ? u.followers.filter(id => id !== currentUser._id)
               : [...(u.followers || []), currentUser._id];
             return { ...u, followers: newFollowers };
@@ -131,7 +131,7 @@ function Search() {
         // Update local suggestions state
         setSuggestions(prev => prev.map(u => {
           if (u._id === targetUser._id) {
-            const newFollowers = isFollowing 
+            const newFollowers = isFollowing
               ? u.followers.filter(id => id !== currentUser._id)
               : [...(u.followers || []), currentUser._id];
             return { ...u, followers: newFollowers };
@@ -160,14 +160,14 @@ function Search() {
       />
 
       <main style={{ maxWidth: '935px', width: '100%', margin: '0 auto', padding: '24px 16px 80px 16px', boxSizing: 'border-box' }}>
-        
+
         {/* Full-Width Wide Search Bar */}
         <div style={{ width: '100%', marginBottom: '24px' }}>
           <div style={{ position: 'relative', width: '100%' }}>
-            <input 
-              type="text" 
-              value={query} 
-              onChange={e => setQuery(e.target.value)} 
+            <input
+              type="text"
+              value={query}
+              onChange={e => setQuery(e.target.value)}
               placeholder="Search users on Pulse by username..."
               style={{
                 width: '100%',
@@ -237,19 +237,19 @@ function Search() {
                         <div style={{ color: 'var(--text-2)', fontSize: '0.82rem' }}>{user.bio || "Pulse User"}</div>
                       </div>
                     </Link>
-                    
+
                     {currentUser && currentUser._id !== user._id && (
-                      <button 
+                      <button
                         onClick={() => handleFollowToggle(user)}
-                        style={{ 
-                          padding: '6px 18px', 
+                        style={{
+                          padding: '6px 18px',
                           borderRadius: '8px',
                           backgroundColor: user.followers?.includes(currentUser._id) ? 'var(--bg-input)' : '#0095f6',
                           color: user.followers?.includes(currentUser._id) ? 'var(--text-1)' : '#ffffff',
                           border: user.followers?.includes(currentUser._id) ? '1px solid var(--border)' : 'none',
-                          fontSize: '0.84rem', 
+                          fontSize: '0.84rem',
                           fontWeight: 700,
-                          cursor: 'pointer' 
+                          cursor: 'pointer'
                         }}
                       >
                         {user.followers?.includes(currentUser._id) ? 'Following' : 'Follow'}
@@ -280,18 +280,18 @@ function Search() {
                         {user.username}
                       </span>
                     </Link>
-                    <button 
+                    <button
                       onClick={() => handleFollowToggle(user)}
-                      style={{ 
+                      style={{
                         marginTop: '8px',
-                        padding: '4px 12px', 
+                        padding: '4px 12px',
                         borderRadius: '6px',
                         backgroundColor: user.followers?.includes(currentUser?._id) ? 'transparent' : '#0095f6',
                         color: user.followers?.includes(currentUser?._id) ? 'var(--text-2)' : '#ffffff',
                         border: user.followers?.includes(currentUser?._id) ? '1px solid var(--border)' : 'none',
-                        fontSize: '0.75rem', 
+                        fontSize: '0.75rem',
                         fontWeight: 700,
-                        cursor: 'pointer' 
+                        cursor: 'pointer'
                       }}
                     >
                       {user.followers?.includes(currentUser?._id) ? 'Following' : 'Follow'}
@@ -330,7 +330,7 @@ function Search() {
         {/* Instagram 3-Column Explore Photo Grid */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
           {posts.map((item, idx) => (
-            <div 
+            <div
               key={`${item._id}_grid_${idx}`}
               onClick={() => setSelectedPostIndex(idx)}
               style={{
@@ -351,7 +351,7 @@ function Search() {
               )}
 
               {/* Hover overlay with likes */}
-              <div 
+              <div
                 style={{
                   position: 'absolute',
                   inset: 0,

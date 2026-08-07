@@ -125,10 +125,30 @@ function CreatePost() {
 
       <LeftNav />
 
-      {/* Main Content Workspace — Centered in grid cols 2-3 */}
-      <main className="createPostMain">
-        {/* Card container */}
-        <div className="createPostCard">
+      {/* Main Content Workspace — Centered Modal Layout */}
+      <main className="createPostMain" style={{
+        flex: 1,
+        width: '100%',
+        maxWidth: '840px',
+        margin: '0 auto',
+        padding: '24px 16px 100px 16px',
+        boxSizing: 'border-box',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center'
+      }}>
+        {/* Instagram Styled Create Post Centered Card Container */}
+        <div style={{
+          width: '100%',
+          backgroundColor: 'var(--bg-card)',
+          border: '1px solid var(--border)',
+          borderRadius: '18px',
+          boxShadow: 'var(--shadow-md)',
+          overflow: 'hidden',
+          display: 'flex',
+          flexDirection: 'column'
+        }}>
           {/* Top Modal Header Bar */}
           <div style={{
             height: '52px',

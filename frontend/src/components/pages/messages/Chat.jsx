@@ -77,7 +77,7 @@ function Chat({ conversation, onBack }) {
       <div className="chatHeader">
         <div className="chatRecipient">
           {onBack && (
-            <button 
+            <button
               onClick={onBack}
               className="chatBackBtn"
               style={{ background: 'none', border: 'none', color: 'var(--text-1)', padding: '0 8px 0 0', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
