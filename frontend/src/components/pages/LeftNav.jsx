@@ -104,11 +104,11 @@ const NAV = [
 ];
 
 const themeOptions = [
-  { value: "beta",      label: "Light Purple ✦ (Default)" },
-  { value: "beta-dark", label: "Deep Space Dark 🌌" },
-  { value: "pulse",     label: "Rose Blossom 🌸 (Pink)" },
-  { value: "dark",      label: "Pure Dark 🌑" },
-  { value: "light",     label: "Pure Light ☀️" },
+  { value: "beta",      label: "Light Purple (Default)" },
+  { value: "beta-dark", label: "Deep Space Dark" },
+  { value: "pulse",     label: "Rose Blossom (Pink)" },
+  { value: "dark",      label: "Pure Dark" },
+  { value: "light",     label: "Pure Light" },
 ];
 
 const mobileHiddenLabels = [
